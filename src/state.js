@@ -27,7 +27,10 @@ export const hausDaten = {
     schuhFarbe: 0x424242     // 👟 Standard: Dunkelgrau
   },
   miloBrauchtHilfe: false, // 🆘 Braucht Milo gerade Hilfe zuhause?
-  stadtFreunde: [] // 🧑‍🤝‍🧑 Liste der Freunde in der Stadt! z.B. ['Lina', 'Finn']
+  stadtFreunde: [], // 🧑‍🤝‍🧑 Liste der Freunde in der Stadt! z.B. ['Lina', 'Finn']
+  dorfFreunde: {}, // 🏘️ Freunde die ins Dorf gezogen sind! z.B. { Lina: { holz: 0, stein: 0, hausGebaut: false } }
+  verheiratet: false, // 💒 Bist du mit Milo verheiratet?
+  miloHerzen: 0 // 💕 Herzen die du durch Gespräche mit Milo gesammelt hast! Bei 5 fragt er dich!
 }
 
 // =============================================================
@@ -57,7 +60,10 @@ export function spielSpeichern(szene, figurDaten, spielerPos) {
         miloWachstum: hausDaten.miloWachstum,
         miloKleidung: hausDaten.miloKleidung,
         miloBrauchtHilfe: hausDaten.miloBrauchtHilfe,
-        stadtFreunde: hausDaten.stadtFreunde
+        stadtFreunde: hausDaten.stadtFreunde,
+        dorfFreunde: hausDaten.dorfFreunde,
+        verheiratet: hausDaten.verheiratet,
+        miloHerzen: hausDaten.miloHerzen
       },
       szene: szene,
       figurDaten: figurDaten || null,
@@ -117,6 +123,9 @@ export function spielstandWiederherstellen(stand) {
     }
     hausDaten.miloBrauchtHilfe = stand.hausDaten.miloBrauchtHilfe || false
     hausDaten.stadtFreunde = stand.hausDaten.stadtFreunde || []
+    hausDaten.dorfFreunde = stand.hausDaten.dorfFreunde || {}
+    hausDaten.verheiratet = stand.hausDaten.verheiratet || false
+    hausDaten.miloHerzen = stand.hausDaten.miloHerzen || 0
   }
 }
 
