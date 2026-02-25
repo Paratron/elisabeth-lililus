@@ -15,6 +15,7 @@ class HausSzene extends Phaser.Scene {
     this.rucksack = rucksack
     this.einrichtenModus = false // 🔨 Erst aus
     this.schlaft = false // 😴 Nicht am Schlafen!
+    this.welpenSchlafen = false // 🐶 Welpen auch wach!
     this.moebelSprites = [] // Alle Möbel-Objekte im Raum
 
     const breite = this.scale.width
@@ -155,9 +156,10 @@ class HausSzene extends Phaser.Scene {
       const px = m.x || (standardPos[i] ? standardPos[i].x : breite * 0.5)
       const py = m.y || (standardPos[i] ? standardPos[i].y : hoehe * 0.5)
 
-      // 🛏️ Bett ist größer als andere Möbel!
+      // 🛏️ Bett und Hundebett sind größer als andere Möbel!
       const istBett = m.name === 'Bett'
-      const groesse = istBett ? '56px' : '36px'
+      const istHundebett = m.name === 'Hundebett'
+      const groesse = istBett ? '56px' : (istHundebett ? '42px' : '36px')
 
       const sprite = this.add.text(px, py, m.emoji, {
         fontSize: groesse
@@ -170,6 +172,16 @@ class HausSzene extends Phaser.Scene {
           if (this.einrichtenModus) return // Im Einrichten-Modus nicht schlafen
           if (this.schlaft) return // Schon am Schlafen!
           this.schlafen(sprite)
+        })
+      }
+
+      // 🐾 Wenn es ein Hundebett ist: Antippen = Welpen schlafen!
+      if (istHundebett) {
+        sprite.setInteractive({ useHandCursor: true })
+        sprite.on('pointerdown', () => {
+          if (this.einrichtenModus) return
+          if (this.welpenSchlafen) return // Schlafen schon!
+          this.welpenSchlafenLassen(sprite)
         })
       }
 
@@ -570,6 +582,69 @@ class HausSzene extends Phaser.Scene {
     if (this.spieler.x > breite - 50) { this.spieler.x = breite - 50; this.spieler.body.setVelocityX(0) }
     if (this.spieler.y < hoehe - 160) { this.spieler.y = hoehe - 160; this.spieler.body.setVelocityY(0) }
     if (this.spieler.y > hoehe - 25) { this.spieler.y = hoehe - 25; this.spieler.body.setVelocityY(0) }
+  }
+
+  // === 🐾 WELPEN SCHLAFEN LASSEN ===
+  welpenSchlafenLassen(hundebettSprite) {
+    this.welpenSchlafen = true
+    soundKlick()
+
+    const bx = hundebettSprite.x
+    const by = hundebettSprite.y
+
+    // 🐶 3 kleine Welpen erscheinen im Hundebett!
+    const welpenEmojis = []
+    const welpenNamen = ['🐶 Flecki', '🐶 Schoki', '🐶 Sunny']
+    for (let i = 0; i < 3; i++) {
+      const wx = bx - 15 + i * 15
+      const wy = by + 3
+      const welpe = this.add.text(wx, wy, '🐶', {
+        fontSize: '14px'
+      }).setOrigin(0.5).setDepth(11)
+      welpenEmojis.push(welpe)
+
+      // 🐶 Hüpf rein!
+      welpe.setScale(0)
+      this.tweens.add({
+        targets: welpe,
+        scale: 1,
+        duration: 400,
+        delay: i * 200,
+        ease: 'Back.easeOut'
+      })
+    }
+
+    // 💤 Zzz über dem Hundebett!
+    this.time.delayedCall(800, () => {
+      const zzz = this.add.text(bx + 20, by - 25, '💤', {
+        fontSize: '18px'
+      }).setDepth(100).setAlpha(0)
+
+      this.tweens.add({
+        targets: zzz,
+        alpha: 1, y: zzz.y - 10,
+        duration: 700, yoyo: true, repeat: 3
+      })
+
+      this.zeigeNachricht('🐾 Die Welpen schlafen ein... So süß! 🥰')
+
+      // ⏳ Nach 5 Sekunden aufwachen
+      this.time.delayedCall(5000, () => {
+        zzz.destroy()
+        welpenEmojis.forEach((w, i) => {
+          this.tweens.add({
+            targets: w,
+            scale: 1.3,
+            duration: 300,
+            delay: i * 150,
+            yoyo: true,
+            onComplete: () => w.destroy()
+          })
+        })
+        this.zeigeNachricht('🐾 *Gähn!* Die Welpen sind aufgewacht! 🐶')
+        this.welpenSchlafen = false
+      })
+    })
   }
 
   // ===  TELEFON ANRUFEN ===

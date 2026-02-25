@@ -17,6 +17,7 @@ export const hausDaten = {
   freundWandFarbe: 0xFF7043, // 🎨 Wandfarbe vom Freund-Haus
   freundDachFarbe: 0x4CAF50, // 🎨 Dachfarbe vom Freund-Haus
   hundGerettet: false, // 🐕 Wurde der Hund schon gerettet?
+  welpenGeboren: false, // 🐾 Hat Bello schon Welpen bekommen?
   tagesZeit: 'tag', // ☀️ Aktuelle Tageszeit: 'morgen', 'tag', 'abend', 'nacht'
   miloWachstum: 0, // 🌱 Milo wächst jeden Tag! (0=Baby, 1-4=wächst, 5=groß wie du!)
   miloKleidung: { // 👗 Milos Kleidung – kann man im Laden kaufen!
@@ -56,6 +57,7 @@ export function spielSpeichern(szene, figurDaten, spielerPos) {
         freundWandFarbe: hausDaten.freundWandFarbe,
         freundDachFarbe: hausDaten.freundDachFarbe,
         hundGerettet: hausDaten.hundGerettet,
+        welpenGeboren: hausDaten.welpenGeboren,
         tagesZeit: hausDaten.tagesZeit,
         miloWachstum: hausDaten.miloWachstum,
         miloKleidung: hausDaten.miloKleidung,
@@ -102,14 +104,13 @@ export function spielstandWiederherstellen(stand) {
     hausDaten.dachFarbe = stand.hausDaten.dachFarbe ?? 0xC62828
     hausDaten.bodenFarbe = stand.hausDaten.bodenFarbe ?? 0xBCAAA4
     hausDaten.moebel = stand.hausDaten.moebel || []
-    // 🐾 Hundebett entfernt – rausfiltern!
-    hausDaten.moebel = hausDaten.moebel.filter(m => m.name !== 'Hundebett')
     hausDaten.hausGebaut = stand.hausDaten.hausGebaut || false
     hausDaten.personGerettet = stand.hausDaten.personGerettet || false
     hausDaten.freundHausGebaut = stand.hausDaten.freundHausGebaut || false
     hausDaten.freundWandFarbe = stand.hausDaten.freundWandFarbe ?? 0xFF7043
     hausDaten.freundDachFarbe = stand.hausDaten.freundDachFarbe ?? 0x4CAF50
     hausDaten.hundGerettet = stand.hausDaten.hundGerettet || false
+    hausDaten.welpenGeboren = stand.hausDaten.welpenGeboren || false
     hausDaten.tagesZeit = stand.hausDaten.tagesZeit || 'tag'
     hausDaten.miloWachstum = stand.hausDaten.miloWachstum || 0
     hausDaten.miloKleidung = stand.hausDaten.miloKleidung || {
