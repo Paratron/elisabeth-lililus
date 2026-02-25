@@ -389,9 +389,11 @@ class HausSzene extends Phaser.Scene {
     this.moebelSprites.forEach(sprite => {
       // Nur Sprites mit moebelIndex sind echte Möbel!
       if (sprite.moebelIndex === undefined) return
+      // ⛔ Graphics-Objekte (z.B. Tischbeine) überspringen!
+      if (!sprite.removeAllListeners) return
 
       sprite.removeAllListeners('pointerdown')
-      sprite.removeInteractive()
+      if (sprite.input) sprite.removeInteractive()
       // 🎯 Großer Touch-Bereich damit man gut greifen kann!
       sprite.setInteractive({
         hitArea: new Phaser.Geom.Rectangle(-25, -25, 80, 80),

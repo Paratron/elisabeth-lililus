@@ -30,7 +30,8 @@ export const hausDaten = {
   stadtFreunde: [], // 🧑‍🤝‍🧑 Liste der Freunde in der Stadt! z.B. ['Lina', 'Finn']
   dorfFreunde: {}, // 🏘️ Freunde die ins Dorf gezogen sind! z.B. { Lina: { holz: 0, stein: 0, hausGebaut: false } }
   verheiratet: false, // 💒 Bist du mit Milo verheiratet?
-  miloHerzen: 0 // 💕 Herzen die du durch Gespräche mit Milo gesammelt hast! Bei 5 fragt er dich!
+  miloHerzen: 0, // 💕 Herzen die du durch Gespräche mit Milo gesammelt hast! Bei 5 fragt er dich!
+  kinder: [] // 👶 Eure Kinder! z.B. [{name: 'Luna', farbe: 0xFF80AB}]
 }
 
 // =============================================================
@@ -63,7 +64,8 @@ export function spielSpeichern(szene, figurDaten, spielerPos) {
         stadtFreunde: hausDaten.stadtFreunde,
         dorfFreunde: hausDaten.dorfFreunde,
         verheiratet: hausDaten.verheiratet,
-        miloHerzen: hausDaten.miloHerzen
+        miloHerzen: hausDaten.miloHerzen,
+        kinder: hausDaten.kinder
       },
       szene: szene,
       figurDaten: figurDaten || null,
@@ -106,6 +108,8 @@ export function spielstandWiederherstellen(stand) {
         m.emoji = '🐾'
       }
     })
+    // 💻 Computer wurde entfernt – rausfiltern!
+    hausDaten.moebel = hausDaten.moebel.filter(m => m.name !== 'Computer')
     hausDaten.hausGebaut = stand.hausDaten.hausGebaut || false
     hausDaten.personGerettet = stand.hausDaten.personGerettet || false
     hausDaten.freundHausGebaut = stand.hausDaten.freundHausGebaut || false
@@ -126,6 +130,7 @@ export function spielstandWiederherstellen(stand) {
     hausDaten.dorfFreunde = stand.hausDaten.dorfFreunde || {}
     hausDaten.verheiratet = stand.hausDaten.verheiratet || false
     hausDaten.miloHerzen = stand.hausDaten.miloHerzen || 0
+    hausDaten.kinder = stand.hausDaten.kinder || []
   }
 }
 

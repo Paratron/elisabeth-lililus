@@ -344,6 +344,10 @@ class BlumenwiesenSpiel extends Phaser.Scene {
               this.erstelleWelpen()
             }
           }
+          // 👶 Kinder zeigen wenn schon geboren!
+          if (hausDaten.kinder && hausDaten.kinder.length > 0) {
+            this.erstelleKinder()
+          }
         }
       }
 
@@ -610,7 +614,30 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       })
     }
 
-    // �🕳️ Prüfe ob Spieler am Mineneingang ist
+    // 👶 Kinder laufen in der Nähe von Milo herum!
+    if (this.kinderSprites && this.kinderSprites.length > 0 && this.freund && this.freund.active && !this.miloSchlaeft) {
+      this.kinderSprites.forEach((baby, i) => {
+        if (!baby || !baby.active) return
+        const ziel = this.kinderZiele[i]
+        if (!ziel || ziel.x === null) return
+
+        const abstandK = Phaser.Math.Distance.Between(baby.x, baby.y, ziel.x, ziel.y)
+        if (abstandK > 5) {
+          // 👶 Baby wackelt zum Ziel! (langsamer als Milo)
+          const winkelK = Phaser.Math.Angle.Between(baby.x, baby.y, ziel.x, ziel.y)
+          baby.x += Math.cos(winkelK) * 0.4
+          baby.y += Math.sin(winkelK) * 0.4
+        } else {
+          // 🎯 Angekommen! Neues Ziel nach kurzer Pause
+          this.kinderZiele[i] = { x: null, y: null }
+          this.time.delayedCall(Phaser.Math.Between(1500, 4000), () => {
+            this.setzeKindNeuesZiel(i)
+          })
+        }
+      })
+    }
+
+    // ⛏️🕳️ Prüfe ob Spieler am Mineneingang ist
     if (this.minenEingang) {
       const abstand = Phaser.Math.Distance.Between(
         this.spieler.x, this.spieler.y,
@@ -1659,7 +1686,10 @@ class BlumenwiesenSpiel extends Phaser.Scene {
         this.miloWachtAuf()
       }
 
-      // 🐦 Vögel zwitschern am Morgen!
+      // � Kinder wachsen jeden Morgen!
+      this.kinderWachsenLassen()
+
+      // �🐦 Vögel zwitschern am Morgen!
       const vogelToene = [800, 1000, 900, 1100, 850]
       vogelToene.forEach((note, i) => {
         setTimeout(() => spieleTon(note, 0.1, 0.03, 'sine'), i * 200)
@@ -2674,28 +2704,38 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       const x = alleineInReihe ? breite / 2 : (breite / 2 - 80 + (i % 2) * 160)
       const y = hoehe * 0.30 + Math.floor(i / 2) * 110
 
+      // ✅ Schon gebaut? Dann nicht nochmal!
+      const schonGebaut = hausDaten.moebel.some(gebaut => gebaut.name === m.name)
+
       // Kann man es bauen?
-      const genug = this.rucksack.holz >= m.holz &&
+      const genug = !schonGebaut &&
+                    this.rucksack.holz >= m.holz &&
                     this.rucksack.stein >= m.stein &&
                     this.rucksack.eisen >= m.eisen
 
       // Karte
-      const karte = this.add.rectangle(x, y, 130, 90, genug ? 0x4CAF50 : 0x616161, 0.9)
+      const kartenFarbe = schonGebaut ? 0x2196F3 : (genug ? 0x4CAF50 : 0x616161)
+      const kartenRand = schonGebaut ? 0x64B5F6 : (genug ? 0x81C784 : 0x9E9E9E)
+      const karte = this.add.rectangle(x, y, 130, 90, kartenFarbe, 0.9)
       karte.setScrollFactor(0).setDepth(251)
-      karte.setStrokeStyle(2, genug ? 0x81C784 : 0x9E9E9E)
+      karte.setStrokeStyle(2, kartenRand)
 
       const icon = this.add.text(x, y - 15, m.emoji, {
         fontSize: '32px'
       }).setOrigin(0.5).setScrollFactor(0).setDepth(252)
 
-      // Kosten anzeigen
+      // Kosten oder "Schon gebaut!" anzeigen
       let kostenText = ''
-      if (m.holz > 0) kostenText += `🪵${m.holz} `
-      if (m.stein > 0) kostenText += `🪨${m.stein} `
-      if (m.eisen > 0) kostenText += `⚙️${m.eisen}`
+      if (schonGebaut) {
+        kostenText = '✅ Schon gebaut!'
+      } else {
+        if (m.holz > 0) kostenText += `🪵${m.holz} `
+        if (m.stein > 0) kostenText += `🪨${m.stein} `
+        if (m.eisen > 0) kostenText += `⚙️${m.eisen}`
+      }
 
       const kosten = this.add.text(x, y + 20, kostenText, {
-        fontSize: '14px', fontFamily: 'Arial', color: genug ? '#ffffff' : '#999999',
+        fontSize: '14px', fontFamily: 'Arial', color: schonGebaut ? '#64B5F6' : (genug ? '#ffffff' : '#999999'),
         stroke: '#000000', strokeThickness: 2
       }).setOrigin(0.5).setScrollFactor(0).setDepth(252)
 
@@ -3253,6 +3293,13 @@ class BlumenwiesenSpiel extends Phaser.Scene {
           this.time.delayedCall(5000, () => {
             this.setzeMiloNeuesZiel()
           })
+
+          // 💒 Gerade Stufe 5 erreicht UND genug Herzen? Antrag! 💍
+          if (stufe === 5 && hausDaten.miloHerzen >= 5 && !hausDaten.verheiratet) {
+            this.time.delayedCall(6000, () => {
+              this.miloMachtAntrag()
+            })
+          }
         }
       })
     } else {
@@ -3303,8 +3350,14 @@ class BlumenwiesenSpiel extends Phaser.Scene {
             this.setzeMiloNeuesZiel()
           })
 
+          // 💒 Wenn genug Herzen da sind: Milo macht einen Antrag! 💍
+          if (hausDaten.miloHerzen >= 5 && !hausDaten.verheiratet && hausDaten.miloWachstum >= 5) {
+            this.time.delayedCall(3000, () => {
+              this.miloMachtAntrag()
+            })
+          }
           // 🆘 Manchmal braucht Milo Hilfe zuhause! (30% Chance)
-          if (Math.random() < 0.3 && this.freundHausPosition) {
+          else if (Math.random() < 0.3 && this.freundHausPosition) {
             hausDaten.miloBrauchtHilfe = true
             this.time.delayedCall(5000, () => {
               this.miloRuftUmHilfe()
@@ -3668,6 +3721,741 @@ class BlumenwiesenSpiel extends Phaser.Scene {
         this.zeigeNachricht('💕 Ihr seid verheiratet! 💍✨')
       })
     })
+  }
+
+  // === 👶 MILO FRAGT: WOLLEN WIR KINDER HABEN? ===
+  kinderFrage() {
+    // 🧹 Alte Kinder entfernen wenn welche da sind!
+    if (hausDaten.kinder.length > 0) {
+      hausDaten.kinder = []
+      if (this.kinderSprites) {
+        this.kinderSprites.forEach(k => { if (k && k.destroy) k.destroy() })
+        this.kinderSprites = []
+        this.kinderZiele = []
+      }
+    }
+
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 🎵 Süße Melodie!
+    const melodie = [523, 659, 784, 659, 523]
+    melodie.forEach((note, i) => {
+      setTimeout(() => spieleTon(note, 0.15, 0.05, 'sine'), i * 200)
+    })
+
+    // 🖤 Dunkler Hintergrund
+    const overlay = this.add.rectangle(breite / 2, hoehe / 2, breite, hoehe, 0x000000, 0.7)
+    overlay.setScrollFactor(0).setDepth(400).setInteractive()
+
+    // 💕 Milos Frage
+    const frageText = this.add.text(breite / 2, hoehe * 0.12,
+      '👶💕 Milo wird ganz aufgeregt!\n\n"Ich hab nachgedacht...\nWollen wir eine Familie haben?\nWie viele Kinder wünschst du dir?" 🥰', {
+        fontSize: '15px', fontFamily: 'Arial', color: '#FFD700',
+        stroke: '#000000', strokeThickness: 3,
+        align: 'center'
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+
+    // 👶 Baby-Emoji schwebt süß
+    const babyEmoji = this.add.text(breite / 2, hoehe * 0.38, '👶', {
+      fontSize: '40px'
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    this.tweens.add({
+      targets: babyEmoji,
+      y: babyEmoji.y - 8,
+      scale: 1.15,
+      duration: 800,
+      yoyo: true,
+      repeat: -1
+    })
+
+    const elemente = [overlay, frageText, babyEmoji]
+
+    // 🔢 Buttons: 1, 2, 3 oder 4 Kinder!
+    const kinderOptionen = [
+      { anzahl: 1, text: '👶 Ein Kind!', farbe: '#E91E63' },
+      { anzahl: 2, text: '👶👶 Zwei Kinder!', farbe: '#9C27B0' },
+      { anzahl: 3, text: '👶👶👶 Drei Kinder!', farbe: '#3F51B5' },
+      { anzahl: 4, text: '👶👶👶👶 Vier Kinder!!', farbe: '#00BCD4' },
+    ]
+
+    kinderOptionen.forEach((opt, i) => {
+      const y = hoehe * 0.5 + i * 48
+      const btn = this.add.text(breite / 2, y, opt.text, {
+        fontSize: '18px', fontFamily: 'Arial', color: '#ffffff',
+        backgroundColor: opt.farbe, padding: { x: 20, y: 10 }
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+      btn.setInteractive({ useHandCursor: true })
+
+      // ✨ Hover!
+      btn.on('pointerover', () => btn.setScale(1.1))
+      btn.on('pointerout', () => btn.setScale(1))
+
+      btn.on('pointerdown', () => {
+        // 🎉 Auswahl getroffen!
+        elemente.forEach(el => el.destroy())
+        this.kinderBekommen(opt.anzahl)
+      })
+      elemente.push(btn)
+    })
+
+    // ❌ Doch nicht
+    const spaeterBtn = this.add.text(breite / 2, hoehe * 0.5 + 4 * 48 + 10, '🤔 Vielleicht später...', {
+      fontSize: '13px', fontFamily: 'Arial', color: '#cccccc',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    spaeterBtn.setInteractive({ useHandCursor: true })
+    spaeterBtn.on('pointerdown', () => {
+      elemente.forEach(el => el.destroy())
+      this.miloRedet = false
+
+      // 💬 Milo versteht
+      const traurig = this.add.text(
+        this.freund.x, this.freund.y - 55,
+        '😊 Okay! Wir haben ja\nnoch viel Zeit! 💕', {
+          fontSize: '12px', fontFamily: 'Arial', color: '#FFD700',
+          stroke: '#000000', strokeThickness: 3,
+          align: 'center', backgroundColor: '#333333',
+          padding: { x: 6, y: 4 }
+        }
+      ).setOrigin(0.5).setDepth(200)
+      this.tweens.add({
+        targets: traurig,
+        alpha: 0, duration: 800, delay: 3000,
+        onComplete: () => traurig.destroy()
+      })
+    })
+    elemente.push(spaeterBtn)
+  }
+
+  // === 🎉 KINDER BEKOMMEN! ===
+  kinderBekommen(anzahl) {
+    // 👶 Jedes Baby einzeln gestalten! Erst alle erstellen, dann feiern!
+    this.neueBabys = []
+    this.babyAnzahl = anzahl
+    this.babyErstellen(0)
+  }
+
+  // === 🎨 EIN BABY GESTALTEN! (wird für jedes Baby aufgerufen) ===
+  babyErstellen(nummer) {
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 🎵 Süßer Sound!
+    spieleTon(659, 0.12, 0.05, 'sine')
+    setTimeout(() => spieleTon(784, 0.1, 0.04, 'sine'), 150)
+
+    // 🖤 Hintergrund
+    const overlay = this.add.rectangle(breite / 2, hoehe / 2, breite, hoehe, 0x000000, 0.8)
+    overlay.setScrollFactor(0).setDepth(400).setInteractive()
+
+    // 👶 Titel
+    const titel = this.add.text(breite / 2, hoehe * 0.06,
+      `👶 Baby Nr. ${nummer + 1} gestalten! 🎨`, {
+        fontSize: '20px', fontFamily: 'Arial', color: '#FFD700',
+        stroke: '#E91E63', strokeThickness: 3
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+
+    const elemente = [overlay, titel]
+
+    // 👧👦 Junge oder Mädchen?
+    const geschlechtLabel = this.add.text(breite / 2, hoehe * 0.16,
+      '👧 Junge oder Mädchen? 👦', {
+        fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    elemente.push(geschlechtLabel)
+
+    let gewaehltesMaedchen = true // Standard: Mädchen
+
+    const maedchenBtn = this.add.text(breite * 0.3, hoehe * 0.23, '👧 Mädchen', {
+      fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#E91E63', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    maedchenBtn.setInteractive({ useHandCursor: true })
+
+    const jungeBtn = this.add.text(breite * 0.7, hoehe * 0.23, '👦 Junge', {
+      fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#555555', padding: { x: 14, y: 8 }
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    jungeBtn.setInteractive({ useHandCursor: true })
+
+    elemente.push(maedchenBtn, jungeBtn)
+
+    // 🎯 Geschlecht wählen
+    maedchenBtn.on('pointerdown', () => {
+      gewaehltesMaedchen = true
+      maedchenBtn.setStyle({ backgroundColor: '#E91E63' })
+      jungeBtn.setStyle({ backgroundColor: '#555555' })
+      soundKlick()
+    })
+    jungeBtn.on('pointerdown', () => {
+      gewaehltesMaedchen = false
+      jungeBtn.setStyle({ backgroundColor: '#1976D2' })
+      maedchenBtn.setStyle({ backgroundColor: '#555555' })
+      soundKlick()
+    })
+
+    // 🎨 Farbe wählen!
+    const farbLabel = this.add.text(breite / 2, hoehe * 0.34,
+      '🎨 Welche Farbe soll das Baby tragen?', {
+        fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    elemente.push(farbLabel)
+
+    const farben = [
+      { farbe: 0xFF80AB, name: '💗 Rosa' },
+      { farbe: 0x80D8FF, name: '💙 Blau' },
+      { farbe: 0xB9F6CA, name: '💚 Grün' },
+      { farbe: 0xFFFF8D, name: '💛 Gelb' },
+      { farbe: 0xEA80FC, name: '💜 Lila' },
+      { farbe: 0xFFAB91, name: '🧡 Orange' },
+    ]
+
+    let gewaehlteFarbe = farben[0].farbe
+    const farbButtons = []
+
+    // 👶 Vorschau-Baby in der Mitte!
+    const vorschauX = breite / 2
+    const vorschauY = hoehe * 0.56
+    const vorschauBaby = this.add.container(vorschauX, vorschauY).setScrollFactor(0).setDepth(402)
+    const vKoerper = this.add.circle(0, 6, 14, gewaehlteFarbe)
+    const vKopf = this.add.circle(0, -10, 11, 0xFFE0B2)
+    const vAugeL = this.add.circle(-4, -12, 2.5, 0x333333)
+    const vAugeR = this.add.circle(4, -12, 2.5, 0x333333)
+    const vMund = this.add.graphics()
+    vMund.lineStyle(1.5, 0x333333)
+    vMund.beginPath()
+    vMund.arc(0, -7, 4, 0.2, Math.PI - 0.2, false)
+    vMund.strokePath()
+    const vSchleife = this.add.text(0, -24, '🎀', { fontSize: '12px' }).setOrigin(0.5)
+    vorschauBaby.add([vKoerper, vKopf, vAugeL, vAugeR, vMund, vSchleife])
+    elemente.push(vorschauBaby)
+
+    // 👶 Baby wippt!
+    this.tweens.add({
+      targets: vorschauBaby,
+      y: vorschauY - 5,
+      duration: 600,
+      yoyo: true,
+      repeat: -1
+    })
+
+    // 🎨 Farb-Buttons
+    farben.forEach((f, i) => {
+      const spalte = i % 3
+      const zeile = Math.floor(i / 3)
+      const x = breite * 0.25 + spalte * (breite * 0.25)
+      const y = hoehe * 0.42 + zeile * 32
+
+      const fBtn = this.add.text(x, y, f.name, {
+        fontSize: '13px', fontFamily: 'Arial', color: '#ffffff',
+        backgroundColor: i === 0 ? '#FFD700' : '#444444',
+        padding: { x: 8, y: 5 }
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+      fBtn.setInteractive({ useHandCursor: true })
+
+      fBtn.on('pointerdown', () => {
+        gewaehlteFarbe = f.farbe
+        // 🎨 Alle zurücksetzen, gewählten markieren
+        farbButtons.forEach(b => b.setStyle({ backgroundColor: '#444444' }))
+        fBtn.setStyle({ backgroundColor: '#FFD700' })
+        // 👶 Vorschau aktualisieren!
+        vKoerper.setFillStyle(f.farbe)
+        soundKlick()
+      })
+
+      farbButtons.push(fBtn)
+      elemente.push(fBtn)
+    })
+
+    // ✏️ Name eingeben! (HTML-Input)
+    const gameDiv = document.getElementById('game') || document.body
+    const eingabeContainer = document.createElement('div')
+    eingabeContainer.style.cssText = 'position:absolute;bottom:12%;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;align-items:center;gap:10px;'
+
+    const nameLabel = document.createElement('div')
+    nameLabel.textContent = '✏️ Wie soll dein Baby heißen?'
+    nameLabel.style.cssText = 'font-size:15px;color:#FFD700;font-family:Arial;text-shadow:2px 2px 4px #000;'
+
+    const nameInput = document.createElement('input')
+    nameInput.type = 'text'
+    nameInput.placeholder = '👶 Name eingeben...'
+    nameInput.maxLength = 12
+    nameInput.style.cssText = 'font-size:20px;padding:10px 18px;border-radius:20px;border:3px solid #FFD700;background:#222;color:#fff;width:200px;outline:none;font-family:Arial;text-align:center;'
+
+    const fertigBtn = document.createElement('button')
+    fertigBtn.textContent = nummer + 1 < this.babyAnzahl ? '✅ Weiter zum nächsten Baby!' : '✅ Fertig! 🎉'
+    fertigBtn.style.cssText = 'font-size:18px;padding:10px 24px;border-radius:20px;border:3px solid #4CAF50;background:#4CAF50;color:white;cursor:pointer;font-family:Arial;'
+
+    eingabeContainer.appendChild(nameLabel)
+    eingabeContainer.appendChild(nameInput)
+    eingabeContainer.appendChild(fertigBtn)
+    gameDiv.appendChild(eingabeContainer)
+
+    // ✅ Fertig-Button!
+    fertigBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim()
+      if (!name) {
+        nameInput.style.borderColor = '#FF5252'
+        nameInput.placeholder = '❌ Bitte einen Namen!'
+        return
+      }
+
+      // 🎵 Bestätigungs-Sound!
+      spieleTon(1047, 0.1, 0.04, 'sine')
+
+      // 👶 Baby speichern!
+      this.neueBabys.push({
+        name: name,
+        farbe: gewaehlteFarbe,
+        istMaedchen: gewaehltesMaedchen,
+        wachstum: 0
+      })
+
+      // 🧹 Aufräumen
+      eingabeContainer.remove()
+      elemente.forEach(el => { if (el && el.destroy) el.destroy() })
+
+      // 👶 Nächstes Baby oder fertig?
+      if (nummer + 1 < this.babyAnzahl) {
+        // ➡️ Nächstes Baby gestalten!
+        this.babyErstellen(nummer + 1)
+      } else {
+        // 🎉 Alle Babys fertig! FEIER!
+        this.babyFeier()
+      }
+    })
+
+    // 🎀/👦 Schleife aktualisieren bei Geschlechts-Wahl
+    const updateSchleife = () => {
+      vSchleife.setVisible(gewaehltesMaedchen)
+    }
+    maedchenBtn.on('pointerdown', updateSchleife)
+    jungeBtn.on('pointerdown', updateSchleife)
+
+    // 🎯 Fokus aufs Namensfeld
+    this.time.delayedCall(100, () => nameInput.focus())
+  }
+
+  // === 🎉 BABY-FEIER! (nachdem alle Babys gestaltet wurden) ===
+  babyFeier() {
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+    const neueKinder = this.neueBabys
+
+    // 💾 Kinder speichern!
+    hausDaten.kinder = neueKinder
+    spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+      x: this.spieler.x, y: this.spieler.y
+    })
+
+    // 🎵 Feier-Melodie!
+    const melodie = [523, 659, 784, 1047, 784, 1047, 1318]
+    melodie.forEach((note, i) => {
+      setTimeout(() => spieleTon(note, 0.2, 0.06, 'sine'), i * 180)
+    })
+
+    // 🌟 Magischer Bildschirm!
+    const overlay = this.add.rectangle(breite / 2, hoehe / 2, breite, hoehe, 0x000000, 0.75)
+    overlay.setScrollFactor(0).setDepth(350)
+
+    // 👶 Titel!
+    const anzahl = neueKinder.length
+    const titelText = anzahl === 1
+      ? '👶✨ Euer Baby ist da! ✨👶'
+      : `👶✨ Eure ${anzahl} Babys sind da! ✨👶`
+    const titel = this.add.text(breite / 2, hoehe * 0.08, titelText, {
+      fontSize: '28px', fontFamily: 'Arial', color: '#FFD700',
+      stroke: '#E91E63', strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(351)
+    this.tweens.add({
+      targets: titel,
+      scale: 1.08, duration: 600, yoyo: true, repeat: -1
+    })
+
+    const elemente = [overlay, titel]
+
+    // 👶 Geschichte erzählen!
+    const texte = [
+      '🌟 Ein Wunder ist geschehen!',
+      '💕 Milo hält deine Hand ganz fest...',
+    ]
+    neueKinder.forEach((kind, i) => {
+      const geschlecht = kind.istMaedchen ? 'ein Mädchen' : 'ein Junge'
+      texte.push(`👶 Baby Nr. ${i + 1} ist da! Es ist ${geschlecht}!`)
+      texte.push(`🏷️ Ihr nennt es: ✨ ${kind.name} ✨`)
+    })
+    texte.push('🎉 Was für ein glücklicher Tag!!')
+    texte.push('👨‍👩‍👧‍👦 Eure Familie ist jetzt komplett! 💕')
+
+    // 👶 Baby-Emojis in der Mitte
+    const babyY = hoehe * 0.45
+    neueKinder.forEach((kind, i) => {
+      const abstand = 70
+      const startX = breite / 2 - ((anzahl - 1) * abstand) / 2
+      const emoji = this.add.text(startX + i * abstand, babyY, '👶', {
+        fontSize: '36px'
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(352).setAlpha(0)
+      elemente.push(emoji)
+
+      const nameText = this.add.text(startX + i * abstand, babyY + 30, kind.name, {
+        fontSize: '14px', fontFamily: 'Arial', color: '#FFD700',
+        stroke: '#000000', strokeThickness: 3
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(352).setAlpha(0)
+      elemente.push(nameText)
+
+      this.tweens.add({
+        targets: [emoji, nameText],
+        alpha: 1, scale: 1.2, duration: 800,
+        delay: 3000 + i * 2000,
+        onComplete: () => {
+          this.tweens.add({
+            targets: emoji, y: emoji.y - 6,
+            duration: 600, yoyo: true, repeat: -1
+          })
+          spieleTon(1047, 0.1, 0.04, 'sine')
+          setTimeout(() => spieleTon(1318, 0.08, 0.03, 'sine'), 150)
+        }
+      })
+    })
+
+    // 📖 Geschichte-Text
+    let textIndex = 0
+    const geschichteText = this.add.text(breite / 2, hoehe * 0.22,
+      texte[0], {
+        fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 3, align: 'center'
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(351)
+    elemente.push(geschichteText)
+
+    this.time.addEvent({
+      delay: 2000, repeat: texte.length - 2,
+      callback: () => {
+        textIndex++
+        if (textIndex < texte.length) {
+          geschichteText.setText(texte[textIndex])
+          spieleTon(800, 0.06, 0.03, 'sine')
+        }
+      }
+    })
+
+    // 🎊 Konfetti!
+    this.time.addEvent({
+      delay: 500, repeat: 20,
+      callback: () => {
+        for (let i = 0; i < 3; i++) {
+          const kx = Phaser.Math.Between(50, breite - 50)
+          const farbe = Phaser.Math.RND.pick([0xFF80AB, 0x80D8FF, 0xB9F6CA, 0xFFFF8D, 0xEA80FC, 0xFFD700])
+          const konfetti = this.add.circle(kx, 0, Phaser.Math.Between(3, 5), farbe)
+          konfetti.setScrollFactor(0).setDepth(353)
+          this.tweens.add({
+            targets: konfetti,
+            y: hoehe + 20, x: konfetti.x + Phaser.Math.Between(-40, 40),
+            duration: Phaser.Math.Between(2000, 3500),
+            onComplete: () => konfetti.destroy()
+          })
+        }
+      }
+    })
+
+    // ⏰ Nach der Geschichte: Familien-Bild und dann Kinder erstellen!
+    const gesamtZeit = 4000 + anzahl * 2000 + 4000
+    this.time.delayedCall(gesamtZeit, () => {
+      elemente.forEach(el => { if (el && el.destroy) el.destroy() })
+
+      const kinderNamen = neueKinder.map(k => k.name).join(', ')
+      const abschluss = this.add.text(breite / 2, hoehe * 0.4,
+        `👨‍👩‍👧‍👦 Eure Familie!\n\n💍 Milo & Du\n👶 ${kinderNamen}\n\n💕 Für immer zusammen! ✨`, {
+          fontSize: '16px', fontFamily: 'Arial', color: '#FFD700',
+          stroke: '#000000', strokeThickness: 4,
+          align: 'center', backgroundColor: '#E91E6388',
+          padding: { x: 20, y: 16 }
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(400)
+
+      this.time.delayedCall(5000, () => {
+        abschluss.destroy()
+        overlay.destroy()
+        this.miloRedet = false
+
+        // 👶 Kinder auf der Wiese erstellen!
+        this.erstelleKinder()
+
+        this.zeigeNachricht('👶 Eure Kinder sind da! 💕')
+      })
+    })
+  }
+
+  // === 🌱 KINDER WACHSEN JEDEN MORGEN! ===
+  kinderWachsenLassen() {
+    if (!hausDaten.kinder || hausDaten.kinder.length === 0) return
+
+    let hatGewachsen = false
+    let neuesErwachsenes = null
+    const nachrichten = []
+
+    hausDaten.kinder.forEach((kind) => {
+      if (kind.inStadt) return // Schon in der Stadt, wächst nicht mehr
+      if ((kind.wachstum || 0) >= 5) return // Schon erwachsen!
+
+      kind.wachstum = (kind.wachstum || 0) + 1
+      hatGewachsen = true
+
+      const wachstumsTexte = {
+        1: `🌱 ${kind.name} ist gewachsen!`,
+        2: `🌱 ${kind.name} hat jetzt Arme! 💪`,
+        3: `🌿 ${kind.name} hat Schuhe! 👟`,
+        4: `🌳 ${kind.name} bekommt Bäckchen! 🥺`,
+        5: `⭐ ${kind.name} ist erwachsen! 🎉`
+      }
+      nachrichten.push(wachstumsTexte[kind.wachstum])
+
+      if (kind.wachstum >= 5) {
+        neuesErwachsenes = kind
+      }
+    })
+
+    if (!hatGewachsen) return
+
+    // 💾 Speichern!
+    spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+      x: this.spieler.x, y: this.spieler.y
+    })
+
+    // 👶 Kinder neu zeichnen (größer!)
+    this.time.delayedCall(2000, () => {
+      this.erstelleKinder()
+
+      // 💬 Wachstums-Nachricht anzeigen!
+      if (nachrichten.length > 0) {
+        const text = nachrichten.join('\n')
+        const msg = this.add.text(
+          this.scale.width / 2, this.scale.height * 0.25,
+          text, {
+            fontSize: '13px', fontFamily: 'Arial', color: '#FFD700',
+            stroke: '#000000', strokeThickness: 3,
+            align: 'center', backgroundColor: '#333333',
+            padding: { x: 10, y: 8 }
+          }
+        ).setOrigin(0.5).setScrollFactor(0).setDepth(250)
+        this.tweens.add({
+          targets: msg, alpha: 0, duration: 800, delay: 4000,
+          onComplete: () => msg.destroy()
+        })
+      }
+
+      // ⭐ Wenn ein Kind gerade erwachsen wurde: Event!
+      if (neuesErwachsenes) {
+        this.time.delayedCall(5000, () => {
+          this.kindIstErwachsen(neuesErwachsenes)
+        })
+      }
+    })
+  }
+
+  // === ⭐ EIN KIND IST ERWACHSEN GEWORDEN! ===
+  kindIstErwachsen(kind) {
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 🎵 Feier-Sound!
+    const melodie = [523, 659, 784, 1047]
+    melodie.forEach((note, i) => {
+      setTimeout(() => spieleTon(note, 0.15, 0.05, 'sine'), i * 200)
+    })
+
+    // 🎊 Konfetti!
+    for (let i = 0; i < 15; i++) {
+      const k = this.add.circle(
+        Phaser.Math.Between(100, breite - 100),
+        0, Phaser.Math.Between(3, 5),
+        Phaser.Math.RND.pick([0xFF80AB, 0x80D8FF, 0xB9F6CA, 0xFFFF8D, 0xEA80FC])
+      ).setScrollFactor(0).setDepth(300)
+      this.tweens.add({
+        targets: k,
+        y: hoehe + 20, x: k.x + Phaser.Math.Between(-40, 40),
+        duration: Phaser.Math.Between(2000, 3500),
+        onComplete: () => k.destroy()
+      })
+    }
+
+    // 🎲 Was passiert? 50% Chance in die Stadt, 50% bleibt und bekommt eigenes Baby
+    const ziehtInStadt = Math.random() < 0.5
+
+    if (ziehtInStadt) {
+      // 🏙️ Kind zieht in die Stadt!
+      kind.inStadt = true
+
+      // 📣 Nachricht
+      const msg = this.add.text(breite / 2, hoehe * 0.3,
+        `🏙️ ${kind.name} ist erwachsen!\n\n"Ich möchte die Stadt sehen!\nIch ziehe nach Blumstadt!" 🚌\n\n👋 Tschüss ${kind.name}! Viel Spaß! 💕`, {
+          fontSize: '15px', fontFamily: 'Arial', color: '#FFD700',
+          stroke: '#000000', strokeThickness: 3,
+          align: 'center', backgroundColor: '#1565C0cc',
+          padding: { x: 14, y: 10 }
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(301)
+
+      // 🏙️ Als Stadt-Freund hinzufügen!
+      if (!hausDaten.stadtFreunde.includes(kind.name)) {
+        hausDaten.stadtFreunde.push(kind.name)
+      }
+
+      this.time.delayedCall(6000, () => {
+        msg.destroy()
+        // 🧹 Kind aus Kinder-Liste entfernen und Sprites neu machen
+        hausDaten.kinder = hausDaten.kinder.filter(k => k.name !== kind.name)
+        this.erstelleKinder()
+        spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+          x: this.spieler.x, y: this.spieler.y
+        })
+        this.zeigeNachricht(`👋 ${kind.name} wohnt jetzt in der Stadt! 🏙️`)
+      })
+    } else {
+      // 👶 Kind bekommt eigenes Baby!
+      const geschlecht = Math.random() < 0.5
+      const babyNamen = geschlecht
+        ? Phaser.Math.RND.pick(['Mika', 'Lio', 'Teo', 'Ari', 'Noel', 'Sam'])
+        : Phaser.Math.RND.pick(['Mila', 'Nia', 'Ava', 'Emi', 'Liv', 'Romy'])
+
+      const msg = this.add.text(breite / 2, hoehe * 0.3,
+        `👶 ${kind.name} hat ein Baby bekommen!\n\nDas Baby heißt: ✨ ${babyNamen} ✨\n\n👨‍👩‍👧 Die Familie wächst! 💕`, {
+          fontSize: '15px', fontFamily: 'Arial', color: '#FFD700',
+          stroke: '#000000', strokeThickness: 3,
+          align: 'center', backgroundColor: '#E91E63cc',
+          padding: { x: 14, y: 10 }
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(301)
+
+      // 👶 Neues Baby zur Liste hinzufügen!
+      hausDaten.kinder.push({
+        name: babyNamen,
+        farbe: kind.farbe,
+        istMaedchen: geschlecht,
+        wachstum: 0
+      })
+
+      this.time.delayedCall(6000, () => {
+        msg.destroy()
+        this.erstelleKinder()
+        spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+          x: this.spieler.x, y: this.spieler.y
+        })
+        this.zeigeNachricht(`👶 ${babyNamen} ist geboren! 💕`)
+      })
+    }
+  }
+
+  // === 👶 KINDER AUF DER WIESE ERSTELLEN ===
+  erstelleKinder() {
+    // 🧹 Alte Kinder-Sprites entfernen falls vorhanden
+    if (this.kinderSprites) {
+      this.kinderSprites.forEach(k => { if (k && k.destroy) k.destroy() })
+    }
+    this.kinderSprites = []
+    this.kinderZiele = []
+
+    if (!hausDaten.kinder || hausDaten.kinder.length === 0) return
+    if (!this.freund) return
+
+    // 👶 Für jedes Kind eine Figur malen! Größe hängt vom Wachstum ab!
+    hausDaten.kinder.forEach((kind, i) => {
+      const startX = this.freund.x + 20 + i * 30
+      const startY = this.freund.y + 10
+
+      const stufe = kind.wachstum || 0
+      // 📌 Größe: 0=winzig, 1-4=wächst, 5=erwachsen
+      const groesse = 0.5 + stufe * 0.1 // 0.5 bis 1.0
+
+      const baby = this.add.container(startX, startY)
+
+      // 🟡 Körper
+      const koerperR = 6 + stufe * 2 // 6 bis 16
+      const koerper = this.add.circle(0, 4 * groesse, koerperR, kind.farbe)
+      baby.add(koerper)
+
+      // 🟡 Kopf
+      const kopfR = 5 + stufe * 1.5 // 5 bis 12.5
+      const kopf = this.add.circle(0, -6 * groesse, kopfR, 0xFFE0B2)
+      baby.add(kopf)
+
+      // 👀 Augen
+      const augenAbstand = 2 + stufe * 0.5
+      const augeL = this.add.circle(-augenAbstand, -7 * groesse, 1.2 + stufe * 0.2, 0x333333)
+      const augeR = this.add.circle(augenAbstand, -7 * groesse, 1.2 + stufe * 0.2, 0x333333)
+      baby.add([augeL, augeR])
+
+      // 😊 Mund
+      const mund = this.add.graphics()
+      mund.lineStyle(1 + stufe * 0.2, 0x333333)
+      mund.beginPath()
+      mund.arc(0, -4 * groesse, 2 + stufe * 0.5, 0.2, Math.PI - 0.2, false)
+      mund.strokePath()
+      baby.add(mund)
+
+      // 💪 Arme (ab Stufe 2!)
+      if (stufe >= 2) {
+        const armL = this.add.rectangle(-koerperR - 2, 2 * groesse, 3, 8 * groesse, kind.farbe)
+        const armR = this.add.rectangle(koerperR + 2, 2 * groesse, 3, 8 * groesse, kind.farbe)
+        baby.add([armL, armR])
+      }
+
+      // 👟 Beine (ab Stufe 3!)
+      if (stufe >= 3) {
+        const beinL = this.add.rectangle(-3 * groesse, 4 * groesse + koerperR, 3, 6 * groesse, 0x5D4037)
+        const beinR = this.add.rectangle(3 * groesse, 4 * groesse + koerperR, 3, 6 * groesse, 0x5D4037)
+        baby.add([beinL, beinR])
+      }
+
+      // 🥺 Bäckchen (ab Stufe 4!)
+      if (stufe >= 4) {
+        const baeckL = this.add.circle(-kopfR + 2, -5 * groesse, 2.5 * groesse, 0xFFCDD2).setAlpha(0.5)
+        const baeckR = this.add.circle(kopfR - 2, -5 * groesse, 2.5 * groesse, 0xFFCDD2).setAlpha(0.5)
+        baby.add([baeckL, baeckR])
+      }
+
+      // 🎀 Mädchen bekommen eine Schleife!
+      if (kind.istMaedchen) {
+        const schleifeSize = stufe >= 3 ? '12px' : '8px'
+        const schleife = this.add.text(0, -6 * groesse - kopfR - 2, '🎀', { fontSize: schleifeSize }).setOrigin(0.5)
+        baby.add(schleife)
+      }
+
+      // 🏷️ Name + Wachstums-Anzeige
+      const nameSize = stufe >= 5 ? '10px' : '8px'
+      const erwachsenText = stufe >= 5 ? ' ⭐' : ''
+      const inStadt = kind.inStadt ? ' 🏙️' : ''
+      const name = this.add.text(0, -6 * groesse - kopfR - (kind.istMaedchen ? 14 : 6), kind.name + erwachsenText + inStadt, {
+        fontSize: nameSize, fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5)
+      baby.add(name)
+
+      baby.setDepth(46)
+      baby.setSize(30 + stufe * 5, 30 + stufe * 5)
+
+      this.kinderSprites.push(baby)
+      this.kinderZiele.push({ x: null, y: null })
+
+      // 🚶 Erstes Ziel setzen
+      this.time.delayedCall(1000 + i * 500, () => {
+        this.setzeKindNeuesZiel(i)
+      })
+    })
+  }
+
+  // === 🚶 KIND BEKOMMT EIN NEUES ZIEL ===
+  setzeKindNeuesZiel(index) {
+    if (!this.freund || !this.kinderSprites[index]) return
+
+    const kind = hausDaten.kinder[index]
+    const stufe = kind ? (kind.wachstum || 0) : 0
+
+    // 👶 Babys bleiben nah bei Milo, Erwachsene laufen weiter!
+    const reichweite = 40 + stufe * 15 // 40 bis 115px
+    this.kinderZiele[index] = {
+      x: this.freund.x + Phaser.Math.Between(-reichweite, reichweite),
+      y: this.freund.y + Phaser.Math.Between(-20, 30)
+    }
   }
 
   // === ✉️ BRIEF AN MILO SCHREIBEN ===
@@ -4037,6 +4825,15 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       optionen.unshift({ text: '🍕 Hier, Pizza für dich!', wert: 'pizza geben' })
     }
 
+    // 👶 Wenn verheiratet: Kinder-Option!
+    if (hausDaten.verheiratet) {
+      if (hausDaten.kinder.length === 0) {
+        optionen.push({ text: '👶 Wollen wir Kinder haben?', wert: '__kinder__' })
+      } else {
+        optionen.push({ text: '👶 Neue Babys machen!', wert: '__kinder__' })
+      }
+    }
+
     const elemente = [overlay, titel]
 
     // 📝 Auch ein eigenes Eingabefeld!
@@ -4097,7 +4894,12 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       btn.on('pointerdown', () => {
         eingabeContainer.remove()
         elemente.forEach(el => el.destroy())
-        this.zeigeMiloGespraech(opt.wert)
+        // 👶 Kinder-Option geht zu kinderFrage!
+        if (opt.wert === '__kinder__') {
+          this.kinderFrage()
+        } else {
+          this.zeigeMiloGespraech(opt.wert)
+        }
       })
       elemente.push(btn)
     })
@@ -4600,14 +5402,332 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       ])
     }
 
-    // 🤷 Wenn Milo IMMER NOCH nichts erkennt – aber viel besser antworten!
+    // � Dinosaurier / Urzeit
+    if (text.match(/dino|saurier|t-rex|raptor|urzeit|fossil|ausgrab|vulkan|lava|mammut/)) {
+      return Phaser.Math.RND.pick([
+        '🦕 DINOSAURIER! Die sind\nSO cool! Am liebsten mag ich\nden T-Rex! ROAAR! 🦖',
+        '🦖 Stell dir vor, hier auf\nder Wiese wäre ein Dino!\nDer wäre riesig! 😱',
+        '🦕 Ich wäre gerne mal in\ndie Urzeit gereist!\nAber nur kurz... die waren\nganz schön groß! 😅',
+        '🌋 Weißt du dass Dinos\nMillionen Jahre gelebt haben?\nDas ist SO lange! 🦕',
+      ])
+    }
+
+    // 🚀 Weltraum / Rakete / Astronaut
+    if (text.match(/weltraum|raket|astronaut|planet|mond|sonne|mars|jupiter|all |kosmo|ufo|alien|galax/)) {
+      return Phaser.Math.RND.pick([
+        '🚀 WOOOSCH! Ab in den\nWeltraum! Ich wäre so gerne\nmal Astronaut! 🌟',
+        '🌙 Der Mond ist so schön!\nOb da oben jemand wohnt? 🤔',
+        '👽 Haha, stell dir vor\nein Alien kommt auf unsere\nWiese! Was würden wir\nihm zeigen? 😄',
+        '🪐 Die Planeten sind so cool!\nSaturn hat Ringe! Wie ein\nriesiger Hula-Hoop! 🌟',
+        '🚀 3... 2... 1... START!\nWir fliegen zum Mond! 🌙✨',
+      ])
+    }
+
+    // 🚗 Fahrzeuge / Autos / Züge
+    if (text.match(/auto|fahrzeug|zug|eisenbahn|bus|fahrrad|motorrad|flugzeug|hubschrauber|traktor|feuerwehr|polizei|schiff|boot|u-boot|lkw|rennauto/)) {
+      return Phaser.Math.RND.pick([
+        '🚗 BRUMM BRUMM! Ich fahre\nam liebsten Fahrrad!\nUnd du? 🚲',
+        '🚒 Feuerwehr ist SO cool!\nTatüü tataa! Die helfen\nallen Leuten! 🦸',
+        '🚂 TSCHUUU TSCHUUU!\nIch liebe Züge!\nDie fahren so schnell! 🚃',
+        '✈️ Fliegen wäre so toll!\nDann könnten wir die ganze\nWelt sehen! 🌍',
+        '🚲 Fahrrad fahren ist\ndas Beste! Wind im Haar\nund WUUUSCH! 💨',
+      ])
+    }
+
+    // 🏖️ Schwimmen / Wasser / Strand / Meer
+    if (text.match(/schwimm|wasser|strand|meer|see |ozean|pool|tauchen|welle|sand|muschel|krabbe|beach|plansch|baden/)) {
+      return Phaser.Math.RND.pick([
+        '🏖️ Schwimmen ist SO toll!\nPlatsch! 💦 Ich liebe Wasser!',
+        '🌊 Am Strand spielen\nund Sandburgen bauen!\nDas wäre ein Traum! 🏰',
+        '🐚 Muscheln sammeln am Strand!\nJede sieht anders aus!\nWie kleine Schätze! ✨',
+        '🏊 PLATSCH! Haha!\nIch spring ins Wasser!\nKommst du mit? 💦😄',
+      ])
+    }
+
+    // 🦸 Superhelden / Superkräfte
+    if (text.match(/superheld|superkraft|fliegen|unsichtbar|superstark|held|kraft|power|cape|maske|retten/)) {
+      return Phaser.Math.RND.pick([
+        '🦸 Wenn ich eine Superkraft\nhätte, würde ich FLIEGEN\nwollen! Und du? 🌟',
+        '💪 Du BIST eine Superheldin!\nDu rettest mich jeden Tag!\n🦸‍♀️✨',
+        '🦸‍♂️ Ich wäre Super-Milo!\nMeine Kraft: Super-Umarmungen!\n🤗💕',
+        '✨ Zusammen sind wir ein\nSuperhelden-Team! Niemand\nkann uns stoppen! 💪🌟',
+      ])
+    }
+
+    // ⚽ Sport / Fußball
+    if (text.match(/sport|fußball|ball |kicken|tor |tooor|rennen|turnen|schwimmen|basketball|tennis|lauf/)) {
+      return Phaser.Math.RND.pick([
+        '⚽ TOOOR! Haha!\nIch spiele gerne Fußball!\nAber ich bin nicht so gut... 😅',
+        '🏃 Sport macht Spaß!\nDanach bin ich immer\nso müde! 😴💪',
+        '⚽ Ich wette, du bist\nrichtig gut im Sport!\nDu bist ja so schnell! 🏃‍♀️',
+        '🥇 Du gewinnst bestimmt\njeden Wettkampf! Du bist\ndie Beste! 🏆',
+      ])
+    }
+
+    // 🍦 Eis / Süßigkeiten / Naschen
+    if (text.match(/eis |eiscreme|süßigkeit|naschen|gummi|lolli|zucker|sahne|vanille|erdbeer|karamell|lutscher|haribo|schokolade/)) {
+      return Phaser.Math.RND.pick([
+        '🍦 EIIIS! Ich liebe Eis!\nAm liebsten Erdbeere! 🍓\nUnd du? Welche Sorte?',
+        '🍬 Süßigkeiten sind SO lecker!\nAber nicht zu viele...\nsonst tut der Bauch weh! 😄',
+        '🍦 Stell dir vor: Eine Kugel\nEis so groß wie unser Haus!\nDas wäre ein Traum! 😋🏠',
+        '🍫 Mmmmh! Lecker!\nAm liebsten würde ich\nden ganzen Tag naschen! 😋',
+      ])
+    }
+
+    // 🧸 Spielzeug / Puppen / Lego
+    if (text.match(/spielzeug|puppe|lego|plüsch|teddy|bär |kuschel|barbie|figur|bauen|puzzle|baustein|knete/)) {
+      return Phaser.Math.RND.pick([
+        '🧸 Kuscheltiere sind die besten!\nIch hätte gerne einen\nkleinen Teddybär! 🐻',
+        '🧱 LEGO ist SO cool!\nMan kann alles bauen!\nEin Haus! Ein Schiff!\nEine Rakete! 🚀',
+        '🧩 Puzzles mag ich auch!\nWenn das letzte Teil passt...\nDAS ist das beste Gefühl! ✨',
+        '🧸 Hast du ein Lieblings-\nSpielzeug? Ich mag alles\nwomit man spielen kann! 😄',
+      ])
+    }
+
+    // 👻 Monster / Grusel / Geister (freundlich!)
+    if (text.match(/monster|grusel|gruselig|geist|gespenst|spuk|vampir|zombie|mumie|angst|dunkel|unheim/)) {
+      return Phaser.Math.RND.pick([
+        '👻 Buuuuh! Haha, hab ich\ndich erschreckt? 😄\nKeine Angst, ich beschütze dich!',
+        '🎃 Monster sind gar nicht\nso gruselig! Vielleicht sind\nsie auch nur einsam? 🤔',
+        '👻 Wenn ich ein Geist wäre,\nwürde ich Leute kitzeln\nstatt erschrecken! 😂',
+        '💪 Keine Angst! Zusammen\nsind wir stärker als\njedes Monster! 🤝✨',
+      ])
+    }
+
+    // 🏴‍☠️ Piraten / Schatzsuche
+    if (text.match(/pirat|schatzsuche|schatzkarte|schatzkist|goldmünz|papagei|augenklappe|kapitän|arrr|ahoi|seeräuber/)) {
+      return Phaser.Math.RND.pick([
+        '🏴‍☠️ ARRR! Ich bin Kapitän Milo!\nAlle an Bord! 🚢',
+        '🗺️ Eine Schatzkarte!\nX markiert die Stelle!\nLass uns suchen! 💎',
+        '🏴‍☠️ Ahoi, Matrose!\nWir segeln zu einer\ngeheimen Insel! 🏝️',
+        '🦜 Ich hätte gerne einen\nPapagei auf der Schulter!\nDer sagt dann: ARRR! 😄',
+      ])
+    }
+
+    // 👸 Prinzessin / Königin / Schloss
+    if (text.match(/prinzessin|königin|könig|schloss|krone|thron|märchen|rapunzel|aschenputtel|schneewittchen/)) {
+      return Phaser.Math.RND.pick([
+        '👸 Du bist eine echte\nPrinzessin! Die mutigste\nim ganzen Land! 👑',
+        '🏰 Stell dir vor, wir hätten\nein Schloss! Mit Türmen\nund einer Zugbrücke! 🏰',
+        '👑 Jede Prinzessin braucht\neine Krone! Deine wäre\naus Sternen! ⭐✨',
+        '📖 Ich mag Märchen!\nAm liebsten die mit\nHappy End! 🥰',
+      ])
+    }
+
+    // 🤖 Roboter / Technik / Erfindungen
+    if (text.match(/roboter|maschine|erfind|bauen|werkzeug|schrauben|motor|technik|programmier|code/)) {
+      return Phaser.Math.RND.pick([
+        '🤖 BIEP BOOP! Ich bin\nRoboter-Milo! 🤖 Haha,\nnur Spaß! 😄',
+        '🔧 Erfindungen sind toll!\nWas würdest du erfinden?\nIch würde eine Pizza-Maschine\nbauen! 🍕',
+        '🤖 Roboter sind cool!\nAber Freunde sind besser! 💕',
+        '⚙️ Wenn wir einen Roboter\nbauen, soll er uns helfen\nBlumen zu pflücken! 🌸🤖',
+      ])
+    }
+
+    // 🎨 Malen / Zeichnen / Basteln / Kunst
+    if (text.match(/malen|zeichnen|bastel|kunst|bild|stift|pinsel|kreide|kleben|schneid|papier|falten|origami/)) {
+      return Phaser.Math.RND.pick([
+        '🎨 Malen ist SO toll!\nIch male am liebsten\nRegenbögen! 🌈',
+        '✏️ Zeichnest du gerne?\nIch wette deine Bilder\nsind wunderschön! 🖼️',
+        '🎨 Ich hab mal versucht\nBello zu malen...\nDas sah aus wie ein Kartoffel! 😂🥔',
+        '✂️ Basteln macht Spaß!\nSchnipp schnapp!\nWas basteln wir? 🎨',
+      ])
+    }
+
+    // 💤 Träume / Fantasie / Vorstellen
+    if (text.match(/traum|träum|fantasie|vorstell|wünsch|stell dir vor|wenn ich|ich wäre|ich hätte|was wäre/)) {
+      return Phaser.Math.RND.pick([
+        '💭 Ich träume manchmal,\ndass ich fliegen kann! 🌙✨\nDas ist so schön!',
+        '🌟 Stell dir vor, wir könnten\nüberall hin reisen!\nWohin würdest du gehen? 🗺️',
+        '💤 Letzte Nacht hab ich\ngeträumt, dass die Blumen\nsingen können! 🌸🎵',
+        '✨ Träumen ist das Beste!\nDa ist alles möglich! 🌈💭',
+      ])
+    }
+
+    // 🏙️ Stadt / Einkaufen / Laden
+    if (text.match(/stadt|einkauf|laden|geschäft|markt|kaufen|verkauf|shop|kiosk|bäcker|metzger/)) {
+      return Phaser.Math.RND.pick([
+        '🏙️ Die Stadt ist so cool!\nDa gibt es den Pizza-Laden! 🍕',
+        '🛍️ Einkaufen macht Spaß!\nBesonders wenn man leckere\nSachen kaufen kann! 😋',
+        '🏪 In der Stadt gibt es\nso viel zu entdecken!\nGehen wir hin? 🚶',
+      ])
+    }
+
+    // 🎉 Party / Feier / Geburtstag
+    if (text.match(/party|feier|fest|tanz|disco|ballon|luftballon|konfetti|girlande|deko/)) {
+      return Phaser.Math.RND.pick([
+        '🎉 PARTY! Ich liebe Partys!\nMit Musik und Tanzen! 💃🕺',
+        '🎈 Ballons! Konfetti!\nLass uns feiern! 🎊',
+        '🥳 Jeder Tag mit dir\nist wie eine Party! 🎉💕',
+      ])
+    }
+
+    // 🐸 Spezielle Tiere die noch fehlen
+    if (text.match(/frosch|schlange|spinne|biene|ameise|käfer|marienkäfer|schnecke|wurm|maus|hamster|hase|kaninchen|eule|pinguin|löwe|tiger|elefant|affe|giraffe|krokodil|hai|wal|delfin|schildkröte|papagei/)) {
+      return Phaser.Math.RND.pick([
+        '🐸 Quaaak! Haha!\nIch mag alle Tiere!\nJedes ist besonders! 🌟',
+        '🐰 Tiere sind die besten!\nWelches ist dein\nLieblingstier? 🤔',
+        '🦁 Stell dir vor, ein Löwe\nauf unserer Wiese!\nDas wäre wild! 😱😄',
+        '🐘 Elefanten sind SO groß!\nUnd trotzdem total lieb!\nGenau wie du! 🥰',
+        '🐬 Delfine können so hoch\nspringen! Die sind mega\nschlau und süß! 💕',
+      ])
+    }
+
+    // 📺 YouTube / TikTok / Videos
+    if (text.match(/youtube|tiktok|video|schauen|gucken|serie|cartoon|anime|zeichentrick|sendung|paw patrol|peppa|pokemon|minecraft|roblox|fortnite/)) {
+      return Phaser.Math.RND.pick([
+        '📺 Videos schauen ist lustig!\nAber zusammen spielen\nist noch besser! 🎮😄',
+        '🎬 Was schaust du gerne?\nIch mag lustige Videos! 😂',
+        '🎮 Minecraft? Roblox?\nDie sind cool! Aber UNSER\nSpiel ist das Beste! 😎⭐',
+      ])
+    }
+
+    // 🏫 Freunde / Kindergarten / andere Kinder
+    if (text.match(/freundin|kumpel|beste.*freund|spielplatz|schaukel|rutsche|wippe|klettergerüst|sandkasten|kindergarten|kita/)) {
+      return Phaser.Math.RND.pick([
+        '🤗 Freunde sind das\nAllerbeste auf der Welt!\nSo wie du und ich! 💕',
+        '🛝 Spielplatz! Jaaa!\nRutschen und Schaukeln!\nWEEEE! 😄',
+        '⛲ Ich wünschte, wir\nhätten eine Schaukel auf\nunserer Wiese! Das wäre\ntoll! 🎉',
+      ])
+    }
+
+    // 🌈 Regenbogen / Bunt / Glitzer
+    if (text.match(/regenbogen|glitzer|glitter|funkeln|schimmer|bunt|leuchten|strahlen|scheinen/)) {
+      return Phaser.Math.RND.pick([
+        '🌈 REGENBOGEN! So schön!\nAlle Farben auf einmal! ✨',
+        '✨ Glitzer ist das Beste!\nAlles sollte glitzern! 🌟💎',
+        '🌈 Weißt du was noch\nbunter ist als ein\nRegenbogen? UNSERE Wiese! 🌸🌺',
+      ])
+    }
+
+    // 🧹 Aufräumen / Sauber / Ordnung
+    if (text.match(/aufräum|sauber|ordnung|putz|wasch|dreckig|schmutzig|müll|staub/)) {
+      return Phaser.Math.RND.pick([
+        '🧹 Aufräumen? Ähm...\nich mach das gleich...\nnach dem Spielen! 😅',
+        '🧼 Sauber machen ist wichtig!\nDanach sieht alles so\nschön aus! ✨',
+        '😅 Aufräumen ist nicht\nmein Lieblings-Hobby...\nAber zusammen geht es\nschneller! 💪',
+      ])
+    }
+
+    // 😤 Bitte / Entschuldigung / Sorry
+    if (text.match(/bitte|entschuldig|tut mir leid|sorry|verzeih|pardon/)) {
+      return Phaser.Math.RND.pick([
+        '😊 Du bist so höflich!\nDas mag ich an dir! ❤️',
+        '🤗 Alles gut! Kein Problem!\nWir sind doch Freunde! 💕',
+        '😊 Bitte? Gern geschehen!\nFür dich immer! 🌟',
+      ])
+    }
+
+    // 🎭 Verkleiden / Kostüm / Karneval
+    if (text.match(/verkleid|kostüm|karneval|fasching|maske|verkleidung|outfit|anzieh|kleid|hose|hemd|schuh|mütze|hut/)) {
+      return Phaser.Math.RND.pick([
+        '🎭 Verkleiden macht SO Spaß!\nIch wäre gerne ein\nPirat! 🏴‍☠️ Oder ein Dino! 🦕',
+        '👗 Was würdest du\nanziehen? Eine Krone?\nEinen Cape? Beides?! 👑🦸',
+        '🎪 Karneval ist toll!\nJeder kann sein was\ner will! 🎉',
+      ])
+    }
+
+    // 🏋️ Groß werden / Erwachsen / Alter
+    if (text.match(/groß.*werd|erwachsen|wachsen|größer|klein.*sein|baby |wenn ich groß/)) {
+      return Phaser.Math.RND.pick([
+        '📏 Du wirst jeden Tag\nein bisschen größer!\nBald bist du riesig! 😄',
+        '🌱 Wachsen ist wie bei\nPflanzen – jeden Tag ein\nkleines bisschen mehr! 🌿',
+        '⭐ Egal wie groß du wirst –\ndu bist JETZT schon\ntotal toll! 💕',
+      ])
+    }
+
+    // 📝 Briefe / Schreiben / Lesen
+    if (text.match(/brief|schreib|post|nachricht|tagebuch|buch|lesen|geschichte|erzähl|märchen/)) {
+      return Phaser.Math.RND.pick([
+        '📝 Briefe schreiben ist toll!\nIch schreibe dir jeden Tag\neinen Brief im Kopf! 💌',
+        '📖 Geschichten sind das Beste!\nJede Geschichte ist wie\nein Abenteuer! ✨',
+        '📚 Liest du gerne?\nIch mag Bücher mit\nBildern! 🖼️📖',
+      ])
+    }
+
+    // 💰 Geld / Münzen / Reich
+    if (text.match(/geld|münze|reich|arm |teuer|billig|sparen|sparkasse|taschengeld/)) {
+      return Phaser.Math.RND.pick([
+        '💰 Geld? Das Wichtigste im\nLeben ist Freundschaft!\nUnd Pizza! 🍕💕',
+        '🪙 In der Mine kann man\nSchätze finden! Das ist\nbesser als Geld! 💎',
+        '💰 Ich bin REICH!\nReich an Freundschaft! 🥰✨',
+      ])
+    }
+
+    // 😇 Gut / Böse / Richtig / Falsch
+    if (text.match(/gut |böse|richtig|falsch|recht|unrecht|fair|gerecht|regel|verbot|erlaubt|darf/)) {
+      return Phaser.Math.RND.pick([
+        '😇 Du bist ein total guter\nMensch! Das spüre ich! ❤️',
+        '⭐ Gut sein ist manchmal\nschwer – aber du schaffst\ndas! Immer! 💪',
+        '🌟 Fehler machen ist okay!\nDaraus lernt man! 😊',
+      ])
+    }
+
+    // ⏰ Zeit / Uhr / Warten
+    if (text.match(/zeit |uhr|warten|lang|schnell|langsam|minute|stunde|morgen|gestern|heute|früh|spät|sofort/)) {
+      return Phaser.Math.RND.pick([
+        '⏰ Die Zeit vergeht so schnell\nwenn wir zusammen spielen! ⚡',
+        '😊 Jede Minute mit dir\nist die beste Minute\ndes Tages! 💕',
+        '🕐 Warten ist schwer...\nAber gute Dinge brauchen\nmanchmal Zeit! ⏳',
+      ])
+    }
+
+    // 🧠 Schlau / Denken / Idee
+    if (text.match(/schlau|klug|denk|idee|gehirn|wissen|versteh|kapier|check|clever|intelligent|genie/)) {
+      return Phaser.Math.RND.pick([
+        '🧠 Du bist SUPER schlau!\nDie schlauste Person\ndie ich kenne! ⭐',
+        '💡 Was für eine tolle Idee!\nDu bist ein echtes Genie! 🌟',
+        '🧠 Zusammen können wir\nalles herausfinden!\nTeamwork! 🤝💡',
+      ])
+    }
+
+    // 🗣️ Verschiedene Ausrufe und Reaktionen
+    if (text.match(/wow|yay|juhu|hurra|jippi|yeah|whoa|ohh|ahh|uff|hmm|ähm|oha|boah|krass|echt|wahnsinn|irre/)) {
+      return Phaser.Math.RND.pick([
+        '🤩 JAAAA! Genau so fühle\nich mich auch! 🎉',
+        '😄 WOOOOW! Du sagst es! ✨',
+        '🥳 HURRA! Ich bin auch\nso aufgeregt! 🎊💕',
+      ])
+    }
+
+    // 🤷 Wenn Milo nichts erkennt – trotzdem super nett antworten!
     // 🧠 Versuche den Ton der Nachricht zu erkennen!
+
+    // 😊 Wenn das Kind einen Emoji schickt
+    if (text.match(/[\u2764\uD83D\uDE0A\uD83D\uDE0D\uD83E\uDD17\uD83D\uDC95\uD83D\uDC96\uD83D\uDC97\uD83D\uDC9D\uD83D\uDC9E]/u)) {
+      return Phaser.Math.RND.pick([
+        '🥰 Awww! Ich schicke dir\nauch ganz viele Herzen!\n❤️💕💖💗💝',
+        '😍 *Milo wird rot*\nDu bist sooo lieb! 💕',
+        '🤗 *Milo umarmt dich*\nDas brauchte ich! ❤️✨',
+      ])
+    }
+
+    // 👋 Wenn das Kind sich verabschiedet
+    if (text.match(/tschüss|tschüs|bye|ciao|bis bald|bis dann|bis morgen|bis später|auf wiedersehen|mach.s gut|geh jetzt/)) {
+      return Phaser.Math.RND.pick([
+        '👋 Tschüüüss! Bis bald!\nIch vermisse dich jetzt\nschon! 🥺💕',
+        '😊 Bis bald! Komm schnell\nwieder! Ich warte hier! 💕',
+        '🤗 Machs gut! Du bist\ndie Beste! Bis baaald! 👋✨',
+      ])
+    }
+
+    // 🤝 Hilfe-Wörter
+    if (text.match(/helf|hilf|hilfe|helfen|brauch|brauche|kannst du mir/)) {
+      return Phaser.Math.RND.pick([
+        '🤝 Klar helfe ich dir!\nDafür sind Freunde da! 💪',
+        '😊 Ich bin immer für dich da!\nWas brauchst du? ❤️',
+        '🌟 Zusammen schaffen wir\nalles! Sag mir was\nich tun soll! 💕',
+      ])
+    }
+
     if (text.length < 5) {
       // Kurze Nachrichten
       return Phaser.Math.RND.pick([
         '😊 Hmm? Erzähl mir mehr! 💬',
         '🤗 Was meinst du damit?\nIch bin neugierig! 😄',
         '💭 Sag mir mehr!\nIch höre zu! 👂',
+        '😄 Oh! Und dann? 🤔',
+        '🌟 Ja? Weiter! Ich will\nmehr hören! 😊',
       ])
     }
 
@@ -4617,6 +5737,8 @@ class BlumenwiesenSpiel extends Phaser.Scene {
         '🤩 WOW! Du bist ja\nvoll aufgeregt! Ich auch! 🎉',
         '😄 JAAA! Deine Begeisterung\nsteckt mich an! 🌟',
         '🥳 So viel Energie!\nDas liebe ich! 💪',
+        '🎉 YEAH! Das klingt\nMEGA! Erzähl mehr! 😄',
+        '✨ OH JA! Da bin ich\nvoll dabei! 🤩',
       ])
     }
 
@@ -4626,10 +5748,13 @@ class BlumenwiesenSpiel extends Phaser.Scene {
         '🤔 Gute Frage! Lass mich\nnachdenken... Hmm...\nIch weiß es nicht! 😅',
         '💭 Oh! Darüber hab ich\nnoch nie nachgedacht! 🧠',
         '😊 Puh, das ist schwer!\nAber ich versuche es:\nKeine Ahnung! 🤣',
+        '🧠 Wow, du stellst die\nbesten Fragen!\nIch überlege... 🤔✨',
+        '😄 Das ist eine SUPER\nFrage! Du bist so schlau! 🌟',
       ])
     }
 
-    // Standard – aber trotzdem nett und bezogen auf die Nachricht
+    // 🌈 Standard – Milo antwortet immer nett und interessiert!
+    // Viele verschiedene Antworten damit es nie langweilig wird!
     return Phaser.Math.RND.pick([
       '😊 Das ist ein toller Gedanke!\nDu bist echt schlau! 🧠',
       '🤗 Ich finde das auch!\nWir denken oft das Gleiche! 💕',
@@ -4639,6 +5764,14 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       '💕 Weißt du was?\nIch bin froh dass es\ndich gibt! ❤️',
       '🤩 Echt? Wow, das ist ja\nspannend! Erzähl weiter! 😄',
       '😊 *Milo nickt begeistert*\nJa genau! Stimmt! 👍',
+      '🌸 Das klingt wunderschön!\nDu hast tolle Ideen! ✨',
+      '😎 Cool! Darüber muss ich\nnachdenken! Du bringst\nmich zum Grübeln! 🧠',
+      '🤗 Ich mag es wenn du\nmir Sachen erzählst!\nDu bist so interessant! 💕',
+      '💭 Hmm, da hast du\nvielleicht Recht!\nDu bist schlauer als ich! 😄',
+      '🎵 *Milo summt fröhlich*\nJa ja, das finde ich\nauch total gut! 🎶',
+      '😊 Du weißt immer genau\nwas du sagen willst!\nDas bewundere ich! ⭐',
+      '🌟 GENAU! So sehe ich\ndas auch! Wir sind ein\ntolles Team! 🤝',
+      '💕 Jedes Gespräch mit dir\nmacht mich glücklich! ❤️✨',
     ])
   }
 
