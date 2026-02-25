@@ -15,7 +15,6 @@ class HausSzene extends Phaser.Scene {
     this.rucksack = rucksack
     this.einrichtenModus = false // 🔨 Erst aus
     this.schlaft = false // 😴 Nicht am Schlafen!
-    this.welpenSchlafen = false // 🐶 Welpen auch wach!
     this.moebelSprites = [] // Alle Möbel-Objekte im Raum
 
     const breite = this.scale.width
@@ -156,10 +155,9 @@ class HausSzene extends Phaser.Scene {
       const px = m.x || (standardPos[i] ? standardPos[i].x : breite * 0.5)
       const py = m.y || (standardPos[i] ? standardPos[i].y : hoehe * 0.5)
 
-      // 🛏️ Bett und Hundebett sind größer als andere Möbel!
+      // 🛏️ Bett ist größer als andere Möbel!
       const istBett = m.name === 'Bett'
-      const istHundebett = m.name === 'Hundebett'
-      const groesse = istBett ? '56px' : (istHundebett ? '42px' : '36px')
+      const groesse = istBett ? '56px' : '36px'
 
       const sprite = this.add.text(px, py, m.emoji, {
         fontSize: groesse
@@ -175,17 +173,7 @@ class HausSzene extends Phaser.Scene {
         })
       }
 
-      // 🐾 Wenn es ein Hundebett ist: Antippen = Welpen schlafen!
-      if (istHundebett) {
-        sprite.setInteractive({ useHandCursor: true })
-        sprite.on('pointerdown', () => {
-          if (this.einrichtenModus) return
-          if (this.welpenSchlafen) return // Schlafen schon!
-          this.welpenSchlafenLassen(sprite)
-        })
-      }
-
-      // 📞 Wenn es ein Telefon ist: Antippen = In die Stadt fahren!
+      //  Wenn es ein Telefon ist: Antippen = In die Stadt fahren!
       const istTelefon = m.name === 'Telefon'
       if (istTelefon) {
         sprite.setInteractive({ useHandCursor: true })
@@ -304,6 +292,7 @@ class HausSzene extends Phaser.Scene {
   }
 
   // === 🪑 MÖBEL VERSCHIEBEN MODUS ===
+  // 🎮 Benutzt Phasers Drag-System – funktioniert super auf Tablets! 📱
   starteMoebelVerschieben() {
     if (hausDaten.moebel.length === 0) {
       this.zeigeNachricht('Noch keine Möbel zum Verschieben!')
@@ -314,64 +303,60 @@ class HausSzene extends Phaser.Scene {
     const breite = this.scale.width
     const hoehe = this.scale.height
 
-    // Hinweis anzeigen
+    // 📝 Hinweis anzeigen
     const hinweis = this.add.text(breite / 2, 45, '👆 Ziehe Möbel an die richtige Stelle!', {
       fontSize: '16px', fontFamily: 'Arial', color: '#FFD700',
       stroke: '#000000', strokeThickness: 3,
       backgroundColor: '#00000088', padding: { x: 12, y: 6 }
     }).setOrigin(0.5).setDepth(200)
 
-    // Fertig-Button
+    // ✅ Fertig-Button
     const fertigBtn = this.add.text(breite / 2, hoehe - 40, '✅ Fertig!', {
       fontSize: '22px', fontFamily: 'Arial', color: '#ffffff',
       backgroundColor: '#4CAF50', padding: { x: 24, y: 8 }
     }).setOrigin(0.5).setDepth(200)
     fertigBtn.setInteractive({ useHandCursor: true })
 
-    // 🪑 Das Möbel das gerade gezogen wird
-    let aktivesObjekt = null
-
-    // 👆 Manuelles Ziehen: pointermove auf der ganzen Szene
-    const moveHandler = (pointer) => {
-      if (!aktivesObjekt) return
-      const nx = Phaser.Math.Clamp(pointer.x, 50, breite - 50)
-      const ny = Phaser.Math.Clamp(pointer.y, 50, hoehe - 90)
-      aktivesObjekt.x = nx
-      aktivesObjekt.y = ny
-      if (aktivesObjekt.rahmen) {
-        aktivesObjekt.rahmen.x = nx
-        aktivesObjekt.rahmen.y = ny
+    // 🖐️ Phaser Drag-System benutzen! Das funktioniert viel besser auf Tablets!
+    const dragHandler = (pointer, gameObject, dragX, dragY) => {
+      // 📏 Möbel darf nicht aus dem Haus raus!
+      gameObject.x = Phaser.Math.Clamp(dragX, 50, breite - 50)
+      gameObject.y = Phaser.Math.Clamp(dragY, 60, hoehe - 90)
+      // ✨ Rahmen mitbewegen!
+      if (gameObject.rahmen) {
+        gameObject.rahmen.x = gameObject.x
+        gameObject.rahmen.y = gameObject.y
       }
     }
 
-    // 👆 Loslassen: Position speichern
-    const upHandler = () => {
-      if (aktivesObjekt) {
-        const idx = aktivesObjekt.moebelIndex
-        if (idx !== undefined && hausDaten.moebel[idx]) {
-          hausDaten.moebel[idx].x = aktivesObjekt.x
-          hausDaten.moebel[idx].y = aktivesObjekt.y
-        }
-        aktivesObjekt = null
+    const dragEndHandler = (pointer, gameObject) => {
+      // 💾 Position merken wenn man loslässt!
+      const idx = gameObject.moebelIndex
+      if (idx !== undefined && hausDaten.moebel[idx]) {
+        hausDaten.moebel[idx].x = gameObject.x
+        hausDaten.moebel[idx].y = gameObject.y
       }
     }
 
-    this.input.on('pointermove', moveHandler)
-    this.input.on('pointerup', upHandler)
+    this.input.on('drag', dragHandler)
+    this.input.on('dragend', dragEndHandler)
 
-    // ✅ Fertig-Button
+    // ✅ Fertig gedrückt = alles aufräumen und speichern!
     fertigBtn.on('pointerdown', () => {
       hinweis.destroy()
       fertigBtn.destroy()
 
-      // 🧹 Events aufräumen!
-      this.input.off('pointermove', moveHandler)
-      this.input.off('pointerup', upHandler)
+      // 🧹 Drag-Events aufräumen!
+      this.input.off('drag', dragHandler)
+      this.input.off('dragend', dragEndHandler)
 
-      // 🧹 Rahmen aufräumen
+      // 🧹 Rahmen aufräumen und Drag deaktivieren
       this.moebelSprites.forEach(s => {
         if (s.rahmen) { s.rahmen.destroy(); s.rahmen = null }
-        if (s.input) { s.disableInteractive() }
+        if (s.input) {
+          s.input.draggable = false
+          s.disableInteractive()
+        }
       })
 
       // 🪑 Möbel komplett neu aufbauen (mit allen Klick-Handlern!)
@@ -385,33 +370,25 @@ class HausSzene extends Phaser.Scene {
       this.zeigeNachricht('🏠 Sieht toll aus! 🎉')
     })
 
-    // 🪑 Nur echte Möbel-Sprites ziehbar machen
+    // 🪑 Jedes echte Möbelstück ziehbar machen!
     this.moebelSprites.forEach(sprite => {
-      // Nur Sprites mit moebelIndex sind echte Möbel!
+      // ⛔ Nur Sprites mit moebelIndex sind echte Möbel!
       if (sprite.moebelIndex === undefined) return
-      // ⛔ Graphics-Objekte (z.B. Tischbeine) überspringen!
-      if (!sprite.removeAllListeners) return
 
-      sprite.removeAllListeners('pointerdown')
+      // 🧹 Alte Klick-Handler entfernen
+      sprite.removeAllListeners()
       if (sprite.input) sprite.removeInteractive()
-      // 🎯 Großer Touch-Bereich damit man gut greifen kann!
-      sprite.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-25, -25, 80, 80),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-        useHandCursor: true
-      })
 
-      // 👆 Antippen = dieses Möbel wird jetzt gezogen!
-      sprite.on('pointerdown', () => {
-        aktivesObjekt = sprite
-      })
+      // 🎯 Interaktiv UND ziehbar machen! (draggable = true!)
+      sprite.setInteractive({ useHandCursor: true, draggable: true })
+      this.input.setDraggable(sprite, true)
 
-      // ✨ Leuchtender Rahmen
+      // ✨ Leuchtender Rahmen damit man sieht was man verschieben kann!
       const rahmen = this.add.rectangle(sprite.x, sprite.y, 60, 60, 0xFFEB3B, 0.3)
       rahmen.setStrokeStyle(2, 0xFFD700).setDepth(9)
       sprite.rahmen = rahmen
 
-      // Pulsieren
+      // 💫 Pulsieren damit es schön leuchtet!
       this.tweens.add({
         targets: rahmen,
         alpha: 0.1, duration: 500, yoyo: true, repeat: -1
@@ -595,74 +572,7 @@ class HausSzene extends Phaser.Scene {
     if (this.spieler.y > hoehe - 25) { this.spieler.y = hoehe - 25; this.spieler.body.setVelocityY(0) }
   }
 
-  // === 🛏️ SCHLAFEN ===
-  // Spieler legt sich ins Bett und schläft!
-  // === 🐾 WELPEN SCHLAFEN LASSEN ===
-  welpenSchlafenLassen(hundebettSprite) {
-    this.welpenSchlafen = true
-    soundKlick()
-
-    const breite = this.scale.width
-    const hoehe = this.scale.height
-    const bx = hundebettSprite.x
-    const by = hundebettSprite.y
-
-    // 🐶 3 kleine Welpen erscheinen im Hundebett!
-    const welpenEmojis = []
-    const welpenNamen = ['🐶 Flecki', '🐶 Schoki', '🐶 Sunny']
-    for (let i = 0; i < 3; i++) {
-      const wx = bx - 15 + i * 15
-      const wy = by + 3
-      const welpe = this.add.text(wx, wy, '🐶', {
-        fontSize: '14px'
-      }).setOrigin(0.5).setDepth(11)
-      welpenEmojis.push(welpe)
-
-      // 🐶 Hüpf rein!
-      welpe.setScale(0)
-      this.tweens.add({
-        targets: welpe,
-        scale: 1,
-        duration: 400,
-        delay: i * 200,
-        ease: 'Back.easeOut'
-      })
-    }
-
-    // 💤 Zzz über dem Hundebett!
-    this.time.delayedCall(800, () => {
-      const zzz = this.add.text(bx + 20, by - 25, '💤', {
-        fontSize: '18px'
-      }).setDepth(100).setAlpha(0)
-
-      this.tweens.add({
-        targets: zzz,
-        alpha: 1, y: zzz.y - 10,
-        duration: 700, yoyo: true, repeat: 3
-      })
-
-      this.zeigeNachricht('🐾 Die Welpen schlafen ein... So süß! 🥰')
-
-      // ⏳ Nach 5 Sekunden aufwachen
-      this.time.delayedCall(5000, () => {
-        zzz.destroy()
-        welpenEmojis.forEach((w, i) => {
-          this.tweens.add({
-            targets: w,
-            scale: 1.3,
-            duration: 300,
-            delay: i * 150,
-            yoyo: true,
-            onComplete: () => w.destroy()
-          })
-        })
-        this.zeigeNachricht('🐾 *Gähn!* Die Welpen sind aufgewacht! 🐶')
-        this.welpenSchlafen = false
-      })
-    })
-  }
-
-  // === 📞 TELEFON ANRUFEN ===
+  // ===  TELEFON ANRUFEN ===
   telefonAnrufen() {
     soundKlick()
 
@@ -756,9 +666,9 @@ class HausSzene extends Phaser.Scene {
     const elemente = [bildschirm, rahmen, titel, miloEmoji, miloBubble]
 
     // 🎮 Spiel-Button: Zahlen-Raten mit Milo!
-    const spielBtn = this.add.text(breite / 2, hoehe * 0.38, '🎮 Zahlen-Raten mit Milo!\n🎲 Errate Milos Zahl!', {
-      fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
-      backgroundColor: '#7B1FA2', padding: { x: 20, y: 12 },
+    const spielBtn = this.add.text(breite / 2, hoehe * 0.33, '🎮 Zahlen-Raten mit Milo!\n🎲 Errate Milos Zahl!', {
+      fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#7B1FA2', padding: { x: 16, y: 10 },
       align: 'center'
     }).setOrigin(0.5).setDepth(301)
     spielBtn.setInteractive({ useHandCursor: true })
@@ -769,9 +679,9 @@ class HausSzene extends Phaser.Scene {
     elemente.push(spielBtn)
 
     // 💬 Chat-Button: Mit Milo schreiben!
-    const chatBtn = this.add.text(breite / 2, hoehe * 0.56, '💬 Mit Milo chatten!\n✏️ Schreib ihm was du willst!', {
-      fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
-      backgroundColor: '#1976D2', padding: { x: 20, y: 12 },
+    const chatBtn = this.add.text(breite / 2, hoehe * 0.48, '💬 Mit Milo chatten!\n✏️ Schreib ihm was du willst!', {
+      fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#1976D2', padding: { x: 16, y: 10 },
       align: 'center'
     }).setOrigin(0.5).setDepth(301)
     chatBtn.setInteractive({ useHandCursor: true })
@@ -781,9 +691,22 @@ class HausSzene extends Phaser.Scene {
     })
     elemente.push(chatBtn)
 
+    // 🦔 Blitz-Button: Blitz-Geschichten gucken!
+    const blitzBtn = this.add.text(breite / 2, hoehe * 0.64, '🦔 Blitz gucken!\n📺 Geschichten über den Igel!', {
+      fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#388E3C', padding: { x: 16, y: 10 },
+      align: 'center'
+    }).setOrigin(0.5).setDepth(301)
+    blitzBtn.setInteractive({ useHandCursor: true })
+    blitzBtn.on('pointerdown', () => {
+      elemente.forEach(el => el.destroy())
+      this.blitzGucken()
+    })
+    elemente.push(blitzBtn)
+
     // ❌ Computer ausschalten
-    const aus = this.add.text(breite / 2, hoehe * 0.76, '🔴 Computer ausschalten', {
-      fontSize: '14px', fontFamily: 'Arial', color: '#FF5252',
+    const aus = this.add.text(breite / 2, hoehe * 0.82, '🔴 Aus', {
+      fontSize: '12px', fontFamily: 'Arial', color: '#FF5252',
       stroke: '#000000', strokeThickness: 2
     }).setOrigin(0.5).setDepth(301)
     aus.setInteractive({ useHandCursor: true })
@@ -915,6 +838,419 @@ class HausSzene extends Phaser.Scene {
       this.computerStarten()
     })
     elemente.push(stop)
+  }
+
+  // === 🦔📺 BLITZ GUCKEN – Folgen über den Igel Blitz! ===
+  blitzGucken() {
+    soundKlick()
+
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 📺 Alle Blitz-Folgen!
+    const folgen = [
+      {
+        titel: 'Folge 1: Der große Regen',
+        szenen: [
+          { text: '🦔 Blitz der kleine Igel wacht auf...', emoji: '🦔', bg: 0x4CAF50, dauer: 3000 },
+          { text: '☁️ "Oh nein! Es regnet!"', emoji: '🌧️', bg: 0x546E7A, dauer: 2500 },
+          { text: '🦔 Blitz läuft los! Er sucht einen trockenen Platz!', emoji: '🏃', bg: 0x546E7A, dauer: 2500 },
+          { text: '🍄 Er findet einen riesigen Pilz!', emoji: '🍄', bg: 0x795548, dauer: 2500 },
+          { text: '🦔 "Perfekt!" Blitz kuschelt sich drunter!', emoji: '🦔', bg: 0x795548, dauer: 2500 },
+          { text: '🐌 Eine Schnecke kommt vorbei!\n"Darf ich auch drunter?"', emoji: '🐌', bg: 0x795548, dauer: 3000 },
+          { text: '🦔 "Na klar!" Zusammen ist es\nviel gemütlicher! 💕', emoji: '🦔🐌', bg: 0x795548, dauer: 3000 },
+          { text: '☀️ Der Regen hört auf!\nEin Regenbogen erscheint! 🌈', emoji: '🌈', bg: 0x42A5F5, dauer: 3000 },
+          { text: '🦔 "Was für ein toller Tag!" 🎉', emoji: '⭐', bg: 0x42A5F5, dauer: 3000 },
+        ]
+      },
+      {
+        titel: 'Folge 2: Der Schatz im Wald',
+        szenen: [
+          { text: '🦔 Blitz spaziert durch den Wald...', emoji: '🦔', bg: 0x2E7D32, dauer: 2500 },
+          { text: '🗺️ Er findet eine alte Karte!', emoji: '🗺️', bg: 0x2E7D32, dauer: 2500 },
+          { text: '🦔 "Ein Schatz?!" Blitz ist aufgeregt!', emoji: '😲', bg: 0x33691E, dauer: 2500 },
+          { text: '🌳 Er folgt der Karte zum großen Baum!', emoji: '🌳', bg: 0x33691E, dauer: 2500 },
+          { text: '🕳️ Am Baum ist ein Loch! Er guckt rein...', emoji: '👀', bg: 0x4E342E, dauer: 2500 },
+          { text: '✨ ES GLITZERT! Ein wunderschöner Stein!', emoji: '💎', bg: 0x4E342E, dauer: 3000 },
+          { text: '🦔 Blitz nimmt den Stein mit nach Hause!', emoji: '🦔', bg: 0x2E7D32, dauer: 2500 },
+          { text: '🌙 Nachts leuchtet der Stein ganz sanft... ✨', emoji: '✨', bg: 0x1a237e, dauer: 3000 },
+          { text: '🦔 Blitz schläft ein mit einem Lächeln! 😊', emoji: '💤', bg: 0x1a237e, dauer: 3000 },
+        ]
+      },
+      {
+        titel: 'Folge 3: Die Pizza-Party',
+        szenen: [
+          { text: '🦔 Blitz hat eine TOLLE Idee!', emoji: '💡', bg: 0xFF8F00, dauer: 2500 },
+          { text: '🍕 "Ich mache eine Pizza-Party!"', emoji: '🍕', bg: 0xE65100, dauer: 2500 },
+          { text: '🧀 Er sammelt Tomaten und Käse!', emoji: '🍅', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🍕 Blitz backt die Pizza!\nEs duftet soooo gut! 😋', emoji: '🍕', bg: 0xE65100, dauer: 3000 },
+          { text: '🐿️ Das Eichhörnchen riecht es!\n"Mmmh was ist das?!"', emoji: '🐿️', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🐰 Auch der Hase kommt angehoppelt!', emoji: '🐰', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🦔🐿️🐰 Alle essen zusammen Pizza!\n"LECKER!" 🍕', emoji: '🍕', bg: 0xE65100, dauer: 3000 },
+          { text: '🎉 Die beste Party EVER!', emoji: '🎉', bg: 0xE65100, dauer: 2500 },
+          { text: '🦔 "Morgen machen wir das wieder!" 🍕💕', emoji: '⭐', bg: 0xFF8F00, dauer: 3000 },
+        ]
+      },
+      {
+        titel: 'Folge 4: Blitz lernt fliegen',
+        szenen: [
+          { text: '🦋 Ein Schmetterling fliegt vorbei...', emoji: '🦋', bg: 0x42A5F5, dauer: 2500 },
+          { text: '🦔 "Ich will auch fliegen!"', emoji: '🦔', bg: 0x42A5F5, dauer: 2500 },
+          { text: '🏔️ Blitz klettert auf einen Hügel!', emoji: '🦔', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🦔 Er springt... und fällt runter! 😅', emoji: '💥', bg: 0x795548, dauer: 2500 },
+          { text: '🐦 "Du brauchst Flügel!" sagt ein Vogel.', emoji: '🐦', bg: 0x42A5F5, dauer: 2500 },
+          { text: '💡 Blitz hat eine Idee!', emoji: '💡', bg: 0xFF8F00, dauer: 2000 },
+          { text: '🍃 Er bastelt sich Flügel aus Blättern!', emoji: '🍃', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🦔🍃 Er springt... und GLEITET! WOHOOO!', emoji: '🦔', bg: 0x42A5F5, dauer: 3000 },
+          { text: '🎉 "Ich bin GEFLOGEN!" 🐦🦋 Alle klatschen!\n\nNaja... fast! 😄', emoji: '⭐', bg: 0x42A5F5, dauer: 3500 },
+        ]
+      },
+      {
+        titel: 'Folge 5: Die Sternschnuppe',
+        szenen: [
+          { text: '🌙 Es ist Nacht. Blitz kann nicht schlafen...', emoji: '🌙', bg: 0x1a237e, dauer: 2500 },
+          { text: '🦔 Er geht nach draußen und schaut hoch!', emoji: '🦔', bg: 0x1a237e, dauer: 2500 },
+          { text: '⭐ WOW! So viele Sterne!', emoji: '⭐', bg: 0x0D47A1, dauer: 2500 },
+          { text: '🌟 Ein Stern blinkt ganz hell!\n"Blinkt der nur für mich?"', emoji: '🌟', bg: 0x0D47A1, dauer: 3000 },
+          { text: '💫 EINE STERNSCHNUPPE!!!', emoji: '💫', bg: 0x0D47A1, dauer: 2500 },
+          { text: '🦔 Schnell! Blitz wünscht sich was!', emoji: '🦔', bg: 0x1a237e, dauer: 2500 },
+          { text: '💕 "Ich wünsche mir...\ndass alle meine Freunde\nglücklich sind!"', emoji: '💕', bg: 0x1a237e, dauer: 3500 },
+          { text: '⭐ Die Sterne leuchten noch heller! ✨', emoji: '✨', bg: 0x0D47A1, dauer: 2500 },
+          { text: '🦔 Blitz lächelt und geht schlafen.\nMorgen wird ein toller Tag! 😊', emoji: '⭐', bg: 0x1a237e, dauer: 3500 },
+        ]
+      },
+      {
+        titel: 'Folge 6: Der mutige Igel',
+        szenen: [
+          { text: '🐿️ Das Eichhörnchen ruft um Hilfe!\n"Meine Nüsse sind weg!"', emoji: '🐿️', bg: 0x4CAF50, dauer: 3000 },
+          { text: '🦔 Blitz kommt angerannt!\n"Ich helfe dir!"', emoji: '🦔', bg: 0x4CAF50, dauer: 2500 },
+          { text: '🔍 Blitz folgt den Spuren im Gras...', emoji: '🔍', bg: 0x2E7D32, dauer: 2500 },
+          { text: '🕳️ Die Spuren führen zu einer dunklen Höhle!', emoji: '🕳️', bg: 0x37474F, dauer: 2500 },
+          { text: '🦔 Blitz schluckt... aber er geht rein!\nEr ist mutig! 💪', emoji: '💪', bg: 0x263238, dauer: 3000 },
+          { text: '🐦 Drin sitzt ein kleiner Vogel!\nEr hatte Hunger! 🥺', emoji: '🐦', bg: 0x37474F, dauer: 3000 },
+          { text: '🦔 "Hier, nimm die Hälfte.\nAber die anderen gehören dem Eichhörnchen!"', emoji: '🦔', bg: 0x4CAF50, dauer: 3500 },
+          { text: '🐿️🐦 Alle teilen fair!\nDer Vogel hat jetzt Freunde! 💕', emoji: '💕', bg: 0x4CAF50, dauer: 3000 },
+          { text: '🦔 Blitz ist ein Held! 🎉⭐', emoji: '⭐', bg: 0x4CAF50, dauer: 3000 },
+        ]
+      },
+      {
+        titel: 'Folge 7: Blitz im Schnee',
+        szenen: [
+          { text: '❄️ Es schneit! Alles ist weiß!', emoji: '❄️', bg: 0x90CAF9, dauer: 2500 },
+          { text: '🦔 "SCHNEE! Wie cool!" ruft Blitz!', emoji: '🦔', bg: 0x90CAF9, dauer: 2500 },
+          { text: '⛄ Er baut einen Schneemann!\nMit Karotten-Nase! 🥕', emoji: '⛄', bg: 0xBBDEFB, dauer: 3000 },
+          { text: '🐰 Der Hase will auch mitmachen!\n"Ich mach die Arme!"', emoji: '🐰', bg: 0xBBDEFB, dauer: 2500 },
+          { text: '❄️ SCHNEEBALLSCHLACHT! 🎯', emoji: '🎯', bg: 0x90CAF9, dauer: 2500 },
+          { text: '🦔 PLATSCH! 😂 Blitz wird getroffen!', emoji: '💥', bg: 0x90CAF9, dauer: 2500 },
+          { text: '🦔🐰🐿️ Alle lachen und spielen im Schnee!', emoji: '😂', bg: 0xBBDEFB, dauer: 2500 },
+          { text: '☕ Danach gibt es heißen Kakao!\nMit Marshmallows! 🍫', emoji: '☕', bg: 0x5D4037, dauer: 3000 },
+          { text: '🦔 "Das war der beste Schneetag ever!" ❄️⭐', emoji: '⭐', bg: 0x90CAF9, dauer: 3000 },
+        ]
+      },
+      {
+        titel: 'Folge 8: Das Geburtstags-Fest',
+        szenen: [
+          { text: '🎂 Heute hat Blitz Geburtstag!', emoji: '🎂', bg: 0xE91E63, dauer: 2500 },
+          { text: '🦔 Aber... wo sind alle seine Freunde?\nEs ist so still! 🥺', emoji: '🦔', bg: 0x795548, dauer: 3000 },
+          { text: '🦔 Blitz geht traurig spazieren...\n"Hat mich jeder vergessen?"', emoji: '😢', bg: 0x795548, dauer: 3000 },
+          { text: '🦔 Er geht nach Hause zurück...', emoji: '🦔', bg: 0x795548, dauer: 2500 },
+          { text: '🎉 ÜBERRASCHUNG!!!\n🐰🐿️🐦🐌 Alle sind da! 🎊', emoji: '🎉', bg: 0xE91E63, dauer: 3000 },
+          { text: '🎂 Eine riesige Torte mit Kerzen!\n🕯️🕯️🕯️🕯️🕯️', emoji: '🎂', bg: 0xE91E63, dauer: 3000 },
+          { text: '🦔 *pust!* Blitz bläst die Kerzen aus!\n"DANKE ihr seid die BESTEN!" 😭💕', emoji: '💕', bg: 0xE91E63, dauer: 3500 },
+          { text: '🎁 So viele Geschenke!\n🐰 gibt ihm eine Mütze! 🧢', emoji: '🎁', bg: 0xE91E63, dauer: 2500 },
+          { text: '🦔 Beste. Party. EVER! 🎉⭐💕', emoji: '⭐', bg: 0xE91E63, dauer: 3000 },
+        ]
+      }
+    ]
+
+    // 📺 Folgen-Auswahl Bildschirm!
+    const bildschirm = this.add.rectangle(breite / 2, hoehe / 2, breite * 0.85, hoehe * 0.75, 0x1a1a2e)
+    bildschirm.setStrokeStyle(4, 0x66BB6A).setDepth(300)
+
+    const titel = this.add.text(breite / 2, hoehe * 0.16, '📺 Blitz - Der kleine Igel 🦔', {
+      fontSize: '16px', fontFamily: 'Arial', color: '#66BB6A',
+      stroke: '#000000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(301)
+
+    const elemente = [bildschirm, titel]
+
+    // 📺 Folgen-Liste zum Auswählen!
+    const startY = hoehe * 0.28
+    const abstand = 28
+
+    folgen.forEach((folge, i) => {
+      const y = startY + i * abstand
+      const btn = this.add.text(breite / 2, y, `▶️ ${folge.titel}`, {
+        fontSize: '12px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5).setDepth(301)
+      btn.setInteractive({ useHandCursor: true })
+      btn.on('pointerover', () => btn.setColor('#66BB6A'))
+      btn.on('pointerout', () => btn.setColor('#ffffff'))
+      btn.on('pointerdown', () => {
+        elemente.forEach(el => el.destroy())
+        this.blitzFolgeAbspielen(folge)
+      })
+      elemente.push(btn)
+    })
+
+    // 🔙 Zurück-Button
+    const zurueck = this.add.text(breite / 2, hoehe * 0.82, '💻 Zurück', {
+      fontSize: '14px', fontFamily: 'Arial', color: '#FF5252',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0.5).setDepth(301)
+    zurueck.setInteractive({ useHandCursor: true })
+    zurueck.on('pointerdown', () => {
+      elemente.forEach(el => el.destroy())
+      this.computerStarten()
+    })
+    elemente.push(zurueck)
+  }
+
+  // === 📺 BLITZ-FOLGE ABSPIELEN! ===
+  blitzFolgeAbspielen(folge) {
+    soundKlick()
+
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 📺 Bildschirm
+    const bildschirm = this.add.rectangle(breite / 2, hoehe / 2, breite * 0.85, hoehe * 0.75, 0x000000)
+    bildschirm.setStrokeStyle(4, 0x66BB6A).setDepth(300)
+
+    // 🎬 Intro-Jingle!
+    const jingle = [523, 659, 784, 1047, 784, 1047]
+    jingle.forEach((note, i) => {
+      setTimeout(() => spieleTon(note, 0.1, 0.06, 'sine'), i * 120)
+    })
+
+    // 📺 Intro: Titel einblenden!
+    const introText = this.add.text(breite / 2, hoehe * 0.45, `📺 ${folge.titel}`, {
+      fontSize: '18px', fontFamily: 'Arial', color: '#66BB6A',
+      stroke: '#000000', strokeThickness: 4, align: 'center'
+    }).setOrigin(0.5).setDepth(302).setAlpha(0)
+
+    const elemente = [bildschirm, introText]
+
+    // 🎬 Titel reinzoomen!
+    this.tweens.add({
+      targets: introText,
+      alpha: 1, scale: { from: 0.3, to: 1 },
+      duration: 800, ease: 'Back.easeOut'
+    })
+
+    // 📺 Nach 3 Sekunden: Erste Szene starten!
+    this.time.delayedCall(3000, () => {
+      introText.destroy()
+
+      let szeneIndex = 0
+
+      // 🎬 Hintergrund (mit sanftem Einblenden)
+      const hg = this.add.rectangle(breite / 2, hoehe / 2, breite * 0.83, hoehe * 0.73, folge.szenen[0].bg)
+      hg.setDepth(301).setAlpha(0)
+      this.tweens.add({ targets: hg, alpha: 1, duration: 600 })
+      elemente.push(hg)
+
+      // 🦔 Großes Emoji – bewegt sich auf und ab wie es atmet!
+      const grossesEmoji = this.add.text(breite / 2, hoehe * 0.38, folge.szenen[0].emoji, {
+        fontSize: '52px'
+      }).setOrigin(0.5).setDepth(303)
+      elemente.push(grossesEmoji)
+
+      // 🫁 Atem-Animation – Emoji bewegt sich sanft hoch und runter!
+      const atemTween = this.tweens.add({
+        targets: grossesEmoji,
+        y: hoehe * 0.38 - 6,
+        duration: 1200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      })
+
+      // ✨ Kleine Sterne/Funken die im Hintergrund schweben!
+      const funken = []
+      for (let i = 0; i < 5; i++) {
+        const funke = this.add.text(
+          Phaser.Math.Between(breite * 0.15, breite * 0.85),
+          Phaser.Math.Between(hoehe * 0.18, hoehe * 0.6),
+          Phaser.Math.RND.pick(['✨', '⭐', '💫', '·', '•']),
+          { fontSize: Phaser.Math.Between(6, 12) + 'px' }
+        ).setOrigin(0.5).setDepth(302).setAlpha(0.3)
+        // 🌟 Jeder Funke schwebt langsam hoch!
+        this.tweens.add({
+          targets: funke,
+          y: funke.y - Phaser.Math.Between(15, 40),
+          alpha: { from: 0.1, to: 0.6 },
+          duration: Phaser.Math.Between(2000, 4000),
+          yoyo: true, repeat: -1,
+          delay: Phaser.Math.Between(0, 2000)
+        })
+        funken.push(funke)
+        elemente.push(funke)
+      }
+
+      // 📺 Text unten – größer damit man besser lesen kann!
+      const szenenText = this.add.text(breite / 2, hoehe * 0.68, folge.szenen[0].text, {
+        fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 3,
+        align: 'center', wordWrap: { width: breite * 0.7 },
+        lineSpacing: 6
+      }).setOrigin(0.5).setDepth(303)
+      elemente.push(szenenText)
+
+      // 📺 Fortschrittsbalken unten
+      const balkenHg = this.add.rectangle(breite / 2, hoehe * 0.87, breite * 0.6, 6, 0x333333)
+      balkenHg.setDepth(303)
+      elemente.push(balkenHg)
+      const balken = this.add.rectangle(breite / 2 - (breite * 0.3), hoehe * 0.87, 0, 6, 0x66BB6A)
+      balken.setOrigin(0, 0.5).setDepth(304)
+      elemente.push(balken)
+
+      // 🎵 Szenen-Sound
+      const spieleSzenenSound = () => {
+        const toene = [330 + szeneIndex * 30, 392 + szeneIndex * 20]
+        toene.forEach((note, i) => {
+          setTimeout(() => spieleTon(note, 0.08, 0.04, 'sine'), i * 100)
+        })
+      }
+      spieleSzenenSound()
+
+      // 📺 Nächste Szene Funktion
+      const naechsteSzene = () => {
+        szeneIndex++
+        if (szeneIndex >= folge.szenen.length) {
+          // 🎬 ENDE!
+          hg.setFillStyle(0x1a237e)
+          grossesEmoji.setText('⭐')
+          atemTween.stop()
+          // ⭐ Stern dreht sich am Ende!
+          this.tweens.add({
+            targets: grossesEmoji,
+            angle: 360, scale: 1.3,
+            duration: 1500, ease: 'Sine.easeInOut'
+          })
+          szenenText.setText('📺 Ende! 🦔⭐\n\nHat dir die Folge gefallen?')
+          balken.setDisplaySize(breite * 0.6, 6)
+          // ✨ Funken verschwinden lassen
+          funken.forEach(f => this.tweens.add({ targets: f, alpha: 0, duration: 500 }))
+
+          // 🎵 Ende-Jingle
+          const endeJingle = [784, 659, 784, 1047]
+          endeJingle.forEach((note, i) => {
+            setTimeout(() => spieleTon(note, 0.12, 0.06, 'sine'), i * 200)
+          })
+
+          // 📺 Buttons: Nochmal oder Zurück
+          const nochmal = this.add.text(breite * 0.35, hoehe * 0.84, '🔄 Nochmal!', {
+            fontSize: '12px', fontFamily: 'Arial', color: '#4CAF50',
+            backgroundColor: '#2E7D32', padding: { x: 8, y: 4 }
+          }).setOrigin(0.5).setDepth(305)
+          nochmal.setInteractive({ useHandCursor: true })
+          nochmal.on('pointerdown', () => {
+            elemente.forEach(el => el.destroy())
+            nochmal.destroy()
+            zurueck.destroy()
+            this.blitzFolgeAbspielen(folge)
+          })
+
+          const zurueck = this.add.text(breite * 0.65, hoehe * 0.84, '📺 Andere Folge', {
+            fontSize: '12px', fontFamily: 'Arial', color: '#FF5252',
+            stroke: '#000000', strokeThickness: 2
+          }).setOrigin(0.5).setDepth(305)
+          zurueck.setInteractive({ useHandCursor: true })
+          zurueck.on('pointerdown', () => {
+            elemente.forEach(el => el.destroy())
+            nochmal.destroy()
+            zurueck.destroy()
+            this.blitzGucken()
+          })
+
+          return
+        }
+
+        // 🎬 Nächste Szene!
+        const szene = folge.szenen[szeneIndex]
+
+        // 🎨 Hintergrund-Farbe sanft wechseln
+        this.tweens.addCounter({
+          from: 0, to: 1, duration: 600,
+          onUpdate: (tween) => {
+            hg.setFillStyle(szene.bg, 0.5 + tween.getValue() * 0.5)
+          },
+          onComplete: () => hg.setFillStyle(szene.bg)
+        })
+
+        // 🦔 Emoji wechseln – hüpft von der Seite rein!
+        const vonLinks = szeneIndex % 2 === 0
+        grossesEmoji.setText(szene.emoji)
+        grossesEmoji.setX(vonLinks ? breite * 0.05 : breite * 0.95)
+        grossesEmoji.setScale(0.5)
+        grossesEmoji.setAngle(vonLinks ? -20 : 20)
+        this.tweens.add({
+          targets: grossesEmoji,
+          x: breite / 2,
+          scale: 1,
+          angle: 0,
+          duration: 600,
+          ease: 'Back.easeOut'
+        })
+
+        // 📝 Text reinblenden mit leichtem Hochschieben
+        szenenText.setText(szene.text)
+        szenenText.setAlpha(0)
+        szenenText.setY(hoehe * 0.72)
+        this.tweens.add({
+          targets: szenenText,
+          alpha: 1,
+          y: hoehe * 0.68,
+          duration: 700,
+          ease: 'Power2'
+        })
+
+        // ✨ Funken neue Positionen
+        funken.forEach(f => {
+          f.setX(Phaser.Math.Between(breite * 0.15, breite * 0.85))
+          f.setText(Phaser.Math.RND.pick(['✨', '⭐', '💫', '·', '•']))
+        })
+
+        // 📊 Fortschrittsbalken updaten
+        const fortschritt = (szeneIndex / (folge.szenen.length - 1)) * breite * 0.6
+        this.tweens.add({ targets: balken, displayWidth: fortschritt, duration: 300 })
+
+        // 🎵 Sound
+        spieleSzenenSound()
+
+        // ⏰ Timer für nächste Szene (x2 damit man lesen kann!)
+        this.blitzTimer = this.time.delayedCall(szene.dauer * 2, naechsteSzene)
+      }
+
+      // ⏰ Timer für erste Szene starten! (x2 damit man lesen kann!)
+      this.blitzTimer = this.time.delayedCall(folge.szenen[0].dauer * 2, naechsteSzene)
+
+      // ⏸️ Antippen = Pause/Weiter
+      bildschirm.setInteractive()
+      let pausiert = false
+      const pauseText = this.add.text(breite / 2, hoehe * 0.15, '', {
+        fontSize: '11px', fontFamily: 'Arial', color: '#FFD700',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5).setDepth(305)
+      elemente.push(pauseText)
+
+      bildschirm.on('pointerdown', () => {
+        if (szeneIndex >= folge.szenen.length) return
+        if (pausiert) {
+          // ▶️ Weiter!
+          pausiert = false
+          pauseText.setText('')
+          naechsteSzene()
+        } else {
+          // ⏸️ Pause!
+          pausiert = true
+          pauseText.setText('⏸️ Pause – Tippe zum Weitergucken!')
+          if (this.blitzTimer) this.blitzTimer.remove()
+        }
+      })
+    })
   }
 
   // === 💬 COMPUTER-CHAT MIT MILO ===
@@ -1211,6 +1547,8 @@ class HausSzene extends Phaser.Scene {
           this.schlaft = false
           // ☀️ Nach dem Schlafen ist es Morgen!
           hausDaten.tagesZeit = 'morgen'
+          // 🌱 Merken: Kinder sollen auf der Wiese wachsen!
+          hausDaten.kinderSollenWachsen = true
         })
       })
     })

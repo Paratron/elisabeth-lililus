@@ -5,6 +5,7 @@ import Phaser from 'phaser'
 import { rucksack, hausDaten, spielSpeichern, spielLaden, spielstandWiederherstellen } from '../state.js'
 import { spieleTon, soundKlick, soundEinsammeln, soundKonfetti, soundTuer, soundBaumFaellt, soundBellen, soundGraben, soundHausGebaut, soundHeli, soundHilferuf, soundHolzHacken, soundHundFreut, soundMine, soundSpielStart, soundSteinKlopfen, soundSteinZerbricht } from '../sounds.js'
 import { maleFigur } from '../figur.js'
+import { miloAntwort } from '../milo.js'
 
 class BlumenwiesenSpiel extends Phaser.Scene {
   constructor() {
@@ -339,10 +340,6 @@ class BlumenwiesenSpiel extends Phaser.Scene {
           // 🐕 Hund zeigen wenn gerettet!
           if (hausDaten.hundGerettet) {
             this.erstelleHund()
-            // 🐾 Welpen zeigen wenn schon geboren!
-            if (hausDaten.welpenGeboren) {
-              this.erstelleWelpen()
-            }
           }
           // 👶 Kinder zeigen wenn schon geboren!
           if (hausDaten.kinder && hausDaten.kinder.length > 0) {
@@ -354,19 +351,14 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       // 🐕 Hund auch zeigen OHNE Freund-Haus! (z.B. vor dem Nacht-Modus)
       if (!hausDaten.freundHausGebaut && hausDaten.hundGerettet) {
         this.erstelleHund()
-        if (hausDaten.welpenGeboren) {
-          this.erstelleWelpen()
-        }
       }
 
-      // 🐾 Falls Hundebett schon da aber Welpen noch nicht geboren → nachholen!
-      if (hausDaten.hundGerettet && !hausDaten.welpenGeboren) {
-        const hatHundebett = hausDaten.moebel.some(m => m.name === 'Hundebett')
-        if (hatHundebett) {
-          this.time.delayedCall(3000, () => {
-            this.welpenGeburt()
-          })
-        }
+      // 🌱 Kinder wachsen lassen wenn im Haus geschlafen wurde!
+      if (hausDaten.kinderSollenWachsen) {
+        hausDaten.kinderSollenWachsen = false
+        this.time.delayedCall(2000, () => {
+          this.kinderWachsenLassen()
+        })
       }
     }
 
@@ -595,23 +587,31 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       }
     }
 
-    // � Welpen folgen dem Hund! (wie eine kleine Reihe)
-    if (this.welpen && this.welpen.length > 0 && this.hund && this.hund.active) {
-      this.welpen.forEach((welpe, i) => {
-        if (!welpe || !welpe.active) return
-        // Erster Welpe folgt dem Hund, die anderen folgen dem Welpen davor!
-        const ziel = i === 0 ? this.hund : this.welpen[i - 1]
-        const abstandW = Phaser.Math.Distance.Between(
-          welpe.x, welpe.y, ziel.x, ziel.y
+    // 🐕 Bello wandert alleine über die Wiese!
+    if (!this.hundFolgt && this.hund && this.hund.active && this.hundZielX !== null && !this.hundWartet) {
+      const abstandB = Phaser.Math.Distance.Between(
+        this.hund.x, this.hund.y,
+        this.hundZielX, this.hundZielY
+      )
+      if (abstandB > 8) {
+        // 🐕 Bello läuft gemütlich zum Ziel
+        const winkelB = Phaser.Math.Angle.Between(
+          this.hund.x, this.hund.y,
+          this.hundZielX, this.hundZielY
         )
-        if (abstandW > 22) {
-          const winkelW = Phaser.Math.Angle.Between(
-            welpe.x, welpe.y, ziel.x, ziel.y
-          )
-          welpe.x += Math.cos(winkelW) * 1.3
-          welpe.y += Math.sin(winkelW) * 1.3
-        }
-      })
+        this.hund.x += Math.cos(winkelB) * 0.5
+        this.hund.y += Math.sin(winkelB) * 0.5
+        // 🐕 Bello guckt in die Laufrichtung!
+        this.hund.setScale(this.hundZielX < this.hund.x ? -1 : 1, 1)
+      } else {
+        // 🐕 Am Ziel angekommen! Kurz ausruhen, dann weiter!
+        this.hundZielX = null
+        this.hundWartet = true
+        this.time.delayedCall(Phaser.Math.Between(3000, 6000), () => {
+          this.hundWartet = false
+          this.setzeBelloNeuesZiel()
+        })
+      }
     }
 
     // 👶 Kinder laufen in der Nähe von Milo herum!
@@ -1681,8 +1681,8 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       })
       this.istNacht = false
 
-      // 🌞 Milo aufwecken wenn er geschlafen hat!
-      if (this.miloSchlaeft && this.freund) {
+      // 🌞 Milo aufwecken! (immer versuchen wenn Freund da ist!)
+      if (this.freund) {
         this.miloWachtAuf()
       }
 
@@ -1805,10 +1805,16 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       })
       this.istNacht = false
 
-      // 🌞 Milo aufwecken!
-      if (this.miloSchlaeft && this.freund) {
+      // 🌞 Milo aufwecken! (immer versuchen, egal ob miloSchlaeft true ist!)
+      if (this.freund) {
         this.miloWachtAuf()
       }
+
+      // 🌱 Kinder wachsen jeden Morgen!
+      this.kinderWachsenLassen()
+
+      // 📷 Kamera folgt wieder dem Spieler!
+      this.cameras.main.startFollow(this.spieler, true, 0.1, 0.1)
 
       // 🐦 Vögel zwitschern!
       const vogelToene = [800, 1000, 900, 1100, 850]
@@ -2625,11 +2631,6 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       { name: '💡 Lampe', kosten: '⚙️ x3 + 🪨 x2', icon: '💡' }
     ]
 
-    // 🐶 Hundebett nur zeigen wenn Bello gerettet wurde!
-    if (hausDaten.hundGerettet) {
-      rezepte.push({ name: '� Hundebett', kosten: '🪵 x3 + 🪨 x1', icon: '🐾' })
-    }
-
     const elemente = [overlay, titel, intro, fundament, wand, dachGrafik, miniTuer, knauf, fenster, fensterH, fensterV]
 
     rezepte.forEach((r, i) => {
@@ -2684,13 +2685,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       { name: 'Lampe', emoji: '💡', holz: 0, stein: 2, eisen: 3 }
     ]
 
-    // 🐶 Hundebett nur wenn Bello gerettet wurde!
-    if (hausDaten.hundGerettet) {
-      moebel.push({ name: 'Hundebett', emoji: '�', holz: 3, stein: 1, eisen: 0 })
-    }
-
-
-    // 📞 Telefon – damit kann man in die Stadt fahren!
+    //  Telefon – damit kann man in die Stadt fahren!
     moebel.push({ name: "Telefon", emoji: "📞", holz: 0, stein: 1, eisen: 2 })
 
     // 💻 Computer – damit kann man mit Milo spielen und chatten!
@@ -2911,13 +2906,6 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     this.zeigeNachricht(`${emoji} ${name} aufgestellt! 🎉`)
     this.konfetti()
 
-    // 🐾 Wenn ein Hundebett gebaut wird und Bello da ist: Welpen kommen!
-    if (name === 'Hundebett' && hausDaten.hundGerettet && !hausDaten.welpenGeboren) {
-      this.time.delayedCall(3000, () => {
-        this.welpenGeburt()
-      })
-    }
-
     this.time.delayedCall(2000, () => {
       this.cameras.main.startFollow(this.spieler)
     })
@@ -3103,6 +3091,13 @@ class BlumenwiesenSpiel extends Phaser.Scene {
   miloGehtSchlafen() {
     if (!this.freund || !this.freund.active) return
     if (!this.freundHausPosition) return
+    if (this.miloSchlaeft) return // 💤 Schläft schon!
+
+    // 💤 SOFORT als schlafend markieren! (nicht erst nach der Animation!)
+    this.miloSchlaeft = true
+    this.freundZielX = null
+    this.freundZielY = null
+    this.freundWartet = true
 
     // 🚶 Milo läuft zu seinem Haus!
     const hausX = this.freundHausPosition.x
@@ -3149,11 +3144,6 @@ class BlumenwiesenSpiel extends Phaser.Scene {
           onComplete: () => {
             // 🌙 Milo ist im Haus! (versteckt)
             this.freund.setVisible(false)
-            // 🚶 Milo wandert nicht mehr!
-            this.freundZielX = null
-            this.freundZielY = null
-            this.freundWartet = true
-            this.miloSchlaeft = true
 
             // 🎵 Tür-Sound
             soundTuer()
@@ -3193,7 +3183,20 @@ class BlumenwiesenSpiel extends Phaser.Scene {
   miloWachtAuf() {
     if (!this.freund) return
 
-    // 💤 Zzz entfernen
+    // �️ Sicherheits-Check: Wenn Milo gar nicht schläft, trotzdem aufräumen!
+    if (!this.miloSchlaeft) {
+      // Milo ist schon wach – einfach sicherstellen dass er sichtbar ist!
+      this.freund.setVisible(true)
+      this.freund.setAlpha(1)
+      this.freund.setScale(1)
+      this.freundWartet = false
+      this.time.delayedCall(2000, () => {
+        this.setzeMiloNeuesZiel()
+      })
+      return
+    }
+
+    // �💤 Zzz entfernen
     if (this.miloZzz) {
       this.miloZzz.destroy()
       this.miloZzz = null
@@ -5123,11 +5126,10 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       ])
     }
 
-    // 🐕 Hund / Bello / Welpen / Tiere
-    if (text.match(/hund|bello|welp|hündchen|wuff|wau|tier|katze|pferd|vogel|schmetterling|fisch/)) {
+    // 🐕 Hund / Bello / Tiere
+    if (text.match(/hund|bello|hündchen|wuff|wau|tier|katze|pferd|vogel|schmetterling|fisch/)) {
       return Phaser.Math.RND.pick([
         '🐕 Bello ist so ein lieber Hund!\nIch mag ihn sehr! 🥰',
-        '🐾 Die Welpen sind sooo süß!\nFlecki ist mein Liebling!',
         '🐶 Wuff wuff! Haha,\nich kann auch bellen! 😄',
         '🐾 Ich liebe Tiere!\nBesonders Bello! 🐕❤️',
       ])
@@ -6430,10 +6432,13 @@ class BlumenwiesenSpiel extends Phaser.Scene {
   }
 
   // === 🐕 HUND ERSTELLEN ===
-  // Ein süßer kleiner Hund der dir folgt!
+  // Ein süßer kleiner Hund der alleine über die Wiese läuft!
   erstelleHund() {
-    const startX = this.spieler.x + 30
-    const startY = this.spieler.y + 10
+    // 🐕 Bello spawnt an einem zufälligen Ort auf der Wiese!
+    const weltBreite = this.weltBreite || this.scale.width * 2
+    const hoehe = this.scale.height
+    const startX = Phaser.Math.Between(100, weltBreite - 100)
+    const startY = Phaser.Math.Between(this.wiesenY + 20, hoehe - 40)
 
     const hund = this.add.container(startX, startY)
 
@@ -6522,189 +6527,6 @@ class BlumenwiesenSpiel extends Phaser.Scene {
             duration: 1500,
             delay: 800,
             onComplete: () => wuff.destroy()
-          })
-        }
-      }
-    })
-  }
-
-  // === 🐾 WELPEN-GEBURT! Bello bekommt Babys! ===
-  welpenGeburt() {
-    hausDaten.welpenGeboren = true
-    spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
-      x: this.spieler.x, y: this.spieler.y
-    })
-
-    // 📢 Bello bellt aufgeregt!
-    soundBellen()
-
-    // 🐕 Kamera schwenkt zu Bello
-    if (this.hund && this.hund.active) {
-      this.cameras.main.stopFollow()
-      this.cameras.main.pan(this.hund.x, this.hund.y, 800)
-    }
-
-    // 🐾 Nachricht!
-    this.time.delayedCall(1000, () => {
-      const breite = this.scale.width
-      const hoehe = this.scale.height
-
-      const nachricht = this.add.text(breite / 2, hoehe * 0.2,
-        '🐾 OH! Bello hat Babys!! 🐾', {
-        fontSize: '24px', fontFamily: 'Arial', color: '#FFD700',
-        stroke: '#000000', strokeThickness: 5,
-        backgroundColor: '#5D4037CC', padding: { x: 16, y: 10 }
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(300)
-
-      this.tweens.add({
-        targets: nachricht,
-        scale: { from: 0.3, to: 1 },
-        duration: 600,
-        ease: 'Back.easeOut'
-      })
-
-      // 🎉 Konfetti!
-      this.time.delayedCall(500, () => this.konfetti())
-
-      // 🐶 Welpen erscheinen!
-      this.time.delayedCall(1500, () => {
-        this.erstelleWelpen()
-        soundBellen()
-
-        const nachricht2 = this.add.text(breite / 2, hoehe * 0.35,
-          '🐶 3 kleine Welpen! Wie süß!! 🥰', {
-          fontSize: '20px', fontFamily: 'Arial', color: '#ffffff',
-          stroke: '#000000', strokeThickness: 4,
-          backgroundColor: '#8D6E6399', padding: { x: 12, y: 8 }
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(300)
-
-        // Alles ausblenden
-        this.time.delayedCall(4000, () => {
-          this.tweens.add({
-            targets: [nachricht, nachricht2],
-            alpha: 0,
-            duration: 800,
-            onComplete: () => {
-              nachricht.destroy()
-              nachricht2.destroy()
-            }
-          })
-          this.cameras.main.startFollow(this.spieler, true, 0.1, 0.1)
-        })
-      })
-    })
-  }
-
-  // === 🐶 WELPEN ERSTELLEN (3 kleine Hundebabys!) ===
-  erstelleWelpen() {
-    this.welpen = []
-
-    // 🎨 Jeder Welpe hat eine andere Farbe!
-    const welpenFarben = [
-      { koerper: 0xBCAAA4, kopf: 0xD7CCC8, name: 'Flecki' },   // 🪶 hellbraun
-      { koerper: 0x5D4037, kopf: 0x6D4C41, name: 'Schoki' },    // 🟤 dunkelbraun
-      { koerper: 0xFFCC80, kopf: 0xFFE0B2, name: 'Sunny' }      // 🟡 goldgelb
-    ]
-
-    const hundX = this.hund ? this.hund.x : this.spieler.x + 40
-    const hundY = this.hund ? this.hund.y : this.spieler.y + 10
-
-    welpenFarben.forEach((farbe, i) => {
-      // Etwas versetzt hinter dem Hund starten
-      const startX = hundX + 20 + i * 15
-      const startY = hundY + 5 + i * 5
-
-      const welpe = this.add.container(startX, startY)
-
-      // 🐶 Kleiner Körper
-      const koerper = this.add.ellipse(0, 2, 16, 9, farbe.koerper)
-      welpe.add(koerper)
-      // 🐶 Kleiner Kopf
-      const kopf = this.add.circle(-6, -2, 5.5, farbe.kopf)
-      welpe.add(kopf)
-      // 🐶 Schnauze
-      const schnauze = this.add.ellipse(-9, -1, 4, 3, 0xEFEBE9)
-      welpe.add(schnauze)
-      // 🐶 Nase
-      const nase = this.add.circle(-10, -1.5, 1, 0x333333)
-      welpe.add(nase)
-      // 🐶 Augen (große Kulleraugen!)
-      const auge = this.add.circle(-5, -4, 1.5, 0x333333)
-      welpe.add(auge)
-      // Glänzende Augen!
-      const glanz = this.add.circle(-4.5, -4.5, 0.5, 0xFFFFFF)
-      welpe.add(glanz)
-      // 🐶 Ohren (noch süßer als bei Bello!)
-      const ohrL = this.add.ellipse(-9, -5, 4, 6, 0x5D4037)
-      ohrL.setAngle(-25)
-      welpe.add(ohrL)
-      const ohrR = this.add.ellipse(-3, -6, 4, 6, 0x5D4037)
-      ohrR.setAngle(25)
-      welpe.add(ohrR)
-      // 🐶 Beinchen (ganz kurz!)
-      welpe.add(this.add.rectangle(-4, 8, 2, 5, 0x795548))
-      welpe.add(this.add.rectangle(0, 8, 2, 5, 0x795548))
-      welpe.add(this.add.rectangle(5, 8, 2, 5, 0x795548))
-      welpe.add(this.add.rectangle(9, 8, 2, 5, 0x795548))
-      // 🐶 Schwanz (wedelt schneller als bei Bello!)
-      const schwanz = this.add.rectangle(10, -1, 2, 7, farbe.koerper)
-      schwanz.setAngle(-30)
-      welpe.add(schwanz)
-
-      welpe.setDepth(46)
-      welpe.setScale(0.85)
-
-      // 🐶 Schwanz wedelt ganz schnell!
-      this.tweens.add({
-        targets: schwanz,
-        angle: { from: -50, to: 50 },
-        duration: 200,
-        yoyo: true,
-        repeat: -1
-      })
-
-      // 🏷️ Name über dem Welpen
-      const nameTag = this.add.text(0, -14, `🐶 ${farbe.name}`, {
-        fontSize: '7px', fontFamily: 'Arial', color: '#ffffff',
-        stroke: '#000000', strokeThickness: 2
-      }).setOrigin(0.5)
-      welpe.add(nameTag)
-
-      // 🎉 Welpe hüpft rein!
-      welpe.setScale(0)
-      this.tweens.add({
-        targets: welpe,
-        scale: 0.85,
-        duration: 500,
-        delay: i * 300,
-        ease: 'Back.easeOut'
-      })
-
-      this.welpen.push(welpe)
-    })
-
-    // 🐶 Welpen fiepen ab und zu! (alle 12-20 Sekunden)
-    this.time.addEvent({
-      delay: 12000,
-      loop: true,
-      callback: () => {
-        if (!this.welpen || this.welpen.length === 0) return
-        // Zufälliger Welpe fiept!
-        const welpe = Phaser.Math.RND.pick(this.welpen)
-        if (welpe && welpe.active) {
-          soundBellen()
-          const fiep = this.add.text(welpe.x, welpe.y - 20, '🐶 Wuff!', {
-            fontSize: '10px', fontFamily: 'Arial', color: '#FFE0B2',
-            stroke: '#000000', strokeThickness: 2,
-            backgroundColor: '#5D403788', padding: { x: 3, y: 1 }
-          }).setOrigin(0.5).setDepth(100)
-          this.tweens.add({
-            targets: fiep,
-            y: fiep.y - 15,
-            alpha: 0,
-            duration: 1200,
-            delay: 600,
-            onComplete: () => fiep.destroy()
           })
         }
       }

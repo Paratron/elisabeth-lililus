@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { spielLaden, spielstandWiederherstellen } from '../state.js'
+import { spielLaden, spielstandWiederherstellen, hausDaten } from '../state.js'
 import { soundSpielStart } from '../sounds.js'
 import { maleFigur } from '../figur.js'
 
@@ -40,13 +40,48 @@ class FigurErstellen extends Phaser.Scene {
     }
 
     // === 🏷️ TITEL ===
-    this.add.text(breite / 2, 30, '🎨 Erstelle deinen Charakter!', {
+    // 🌍 Sprache merken (Standard: Deutsch)
+    this.sprache = hausDaten.sprache || 'de'
+
+    this.titelText = this.add.text(breite / 2, 30, this.getText('titel'), {
       fontSize: '28px',
       fontFamily: 'Arial',
       color: '#2E7D32',
       stroke: '#ffffff',
       strokeThickness: 4
     }).setOrigin(0.5)
+
+    // === 🌍 SPRACHE WÄHLEN (Flaggen!) ===
+    const flaggenY = 30
+    const flaggenStartX = 60
+
+    // 🇩🇪 Deutsch
+    this.flaggeDE = this.add.text(flaggenStartX, flaggenY, '🇩🇪', {
+      fontSize: '28px',
+      backgroundColor: this.sprache === 'de' ? '#4CAF50' : '#78909C',
+      padding: { x: 6, y: 4 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+    this.flaggeDE.on('pointerdown', () => {
+      this.sprache = 'de'
+      hausDaten.sprache = 'de'
+      this.flaggeDE.setBackgroundColor('#4CAF50')
+      this.flaggeEN.setBackgroundColor('#78909C')
+      this.titelText.setText(this.getText('titel'))
+    })
+
+    // 🇬🇧 English
+    this.flaggeEN = this.add.text(flaggenStartX + 60, flaggenY, '🇬🇧', {
+      fontSize: '28px',
+      backgroundColor: this.sprache === 'en' ? '#4CAF50' : '#78909C',
+      padding: { x: 6, y: 4 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+    this.flaggeEN.on('pointerdown', () => {
+      this.sprache = 'en'
+      hausDaten.sprache = 'en'
+      this.flaggeEN.setBackgroundColor('#4CAF50')
+      this.flaggeDE.setBackgroundColor('#78909C')
+      this.titelText.setText(this.getText('titel'))
+    })
 
     // === 📋 AUSGEWÄHLTE OPTIONEN ===
     this.auswahl = {
@@ -288,6 +323,8 @@ class FigurErstellen extends Phaser.Scene {
     losButton.on('pointerdown', () => {
       // 🏷️ Name mit übergeben!
       this.auswahl.name = this.spielerName || ''
+      // 🌍 Sprache speichern!
+      hausDaten.sprache = this.sprache
       // 🔊 Spiel-Start Melodie!
       soundSpielStart()
       // 🎮 Spiel starten mit der gewählten Figur!
@@ -346,6 +383,16 @@ class FigurErstellen extends Phaser.Scene {
 
     // ✨ Gleiche Funktion wie im Spiel – nur größer (s=2)!
     maleFigur(this, this.vorschauContainer, this.auswahl, 2)
+  }
+
+  // 🌍 Texte in der gewählten Sprache!
+  getText(schluessel) {
+    const texte = {
+      titel: { de: '🎨 Erstelle deinen Charakter!', en: '🎨 Create your Character!' },
+    }
+    const eintrag = texte[schluessel]
+    if (!eintrag) return schluessel
+    return eintrag[this.sprache] || eintrag['de']
   }
 }
 
