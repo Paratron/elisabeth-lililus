@@ -41,6 +41,9 @@ export const hausDaten = {
 // =============================================================
 const SAVE_KEY = 'blumenwiese-spielstand'
 
+// 💾 Letzte Speicherdaten merken (falls wir noch schnell speichern müssen!)
+let letzterStand = null
+
 // 💾 Alles speichern!
 export function spielSpeichern(szene, figurDaten, spielerPos) {
   try {
@@ -74,10 +77,46 @@ export function spielSpeichern(szene, figurDaten, spielerPos) {
       spielerPos: spielerPos || null,
       zeitstempel: Date.now()
     }
+    // 💾 Merken für Notfall-Speicherung!
+    letzterStand = stand
     localStorage.setItem(SAVE_KEY, JSON.stringify(stand))
   } catch (e) {
-    // Kein Fehler zeigen – einfach weiterspielen
+    // ⚠️ Speichern fehlgeschlagen! (z.B. kein localStorage vorhanden)
+    console.warn('💾 Speichern fehlgeschlagen:', e)
   }
+}
+
+// 🚨 NOTFALL-SPEICHERUNG wenn die Seite geschlossen wird!
+// Das ist SUPER wichtig damit nichts verloren geht!
+try {
+  // 📱 Wenn das Tab gewechselt oder der Browser minimiert wird
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && letzterStand) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(letzterStand))
+      } catch (e) { /* stille Fehler */ }
+    }
+  })
+
+  // 🚪 Wenn die Seite geschlossen wird
+  window.addEventListener('beforeunload', () => {
+    if (letzterStand) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(letzterStand))
+      } catch (e) { /* stille Fehler */ }
+    }
+  })
+
+  // 📱 Wenn das Tablet in den Standby geht (für Amazon Fire!)
+  window.addEventListener('pagehide', () => {
+    if (letzterStand) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(letzterStand))
+      } catch (e) { /* stille Fehler */ }
+    }
+  })
+} catch (e) {
+  // Falls document/window noch nicht bereit sind
 }
 
 // 📥 Alles laden!
@@ -85,8 +124,12 @@ export function spielLaden() {
   try {
     const json = localStorage.getItem(SAVE_KEY)
     if (!json) return null
-    return JSON.parse(json)
+    const stand = JSON.parse(json)
+    // ✅ Prüfen ob der Spielstand gültig ist!
+    if (!stand || typeof stand !== 'object') return null
+    return stand
   } catch (e) {
+    console.warn('📥 Laden fehlgeschlagen:', e)
     return null
   }
 }

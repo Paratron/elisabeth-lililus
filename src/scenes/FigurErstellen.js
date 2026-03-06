@@ -22,7 +22,11 @@ class FigurErstellen extends Phaser.Scene {
       if (stand.spielerPos) {
         daten._spielerPos = stand.spielerPos
       }
-      this.scene.start(stand.szene, daten)
+      // 🛡️ Falls die gespeicherte Szene nicht mehr existiert → zur Wiese!
+      const gueltigeSzenen = ['BlumenwiesenSpiel', 'MinenSzene', 'HausSzene', 'MiloHausSzene', 'StadtSzene']
+      const zielSzene = gueltigeSzenen.includes(stand.szene) ? stand.szene : 'BlumenwiesenSpiel'
+      console.log('💾 Spielstand geladen! Szene:', zielSzene)
+      this.scene.start(zielSzene, daten)
       return
     }
 

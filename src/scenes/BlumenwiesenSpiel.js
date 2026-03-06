@@ -384,9 +384,15 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       this.erstelleDorfFreunde()
     }
 
-    // 💾 AUTO-SAVE: Alle 5 Sekunden speichern!
+    // 💾 SOFORT speichern wenn die Wiese geladen wird!
+    spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+      x: this.spieler.x,
+      y: this.spieler.y
+    })
+
+    // 💾 AUTO-SAVE: Alle 3 Sekunden speichern! (öfter = sicherer!)
     this.time.addEvent({
-      delay: 5000,
+      delay: 3000,
       loop: true,
       callback: () => {
         spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
