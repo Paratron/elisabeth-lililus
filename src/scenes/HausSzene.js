@@ -223,6 +223,17 @@ class HausSzene extends Phaser.Scene {
         })
       }
 
+      // 🪞 Wenn es ein Spiegel ist: Antippen = Aussehen ändern!
+      const istSpiegel = m.name === 'Spiegel'
+      if (istSpiegel) {
+        sprite.setInteractive({ useHandCursor: true })
+        sprite.on('pointerdown', () => {
+          if (this.einrichtenModus) return
+          if (this.schlaft) return
+          this.spiegelBenutzen()
+        })
+      }
+
       sprite.moebelIndex = i // Merken welches Möbel das ist
       this.moebelSprites.push(sprite)
     })
@@ -644,6 +655,266 @@ class HausSzene extends Phaser.Scene {
         this.zeigeNachricht('🐾 *Gähn!* Die Welpen sind aufgewacht! 🐶')
         this.welpenSchlafen = false
       })
+    })
+  }
+
+  // === 🪞 SPIEGEL BENUTZEN – Aussehen ändern! ===
+  spiegelBenutzen() {
+    soundKlick()
+
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+
+    // 🪞 Alle Elemente die wir am Ende wieder wegräumen
+    const elemente = []
+
+    // Dunkler Hintergrund
+    const overlay = this.add.rectangle(breite / 2, hoehe / 2, breite, hoehe, 0x000000, 0.7)
+    overlay.setDepth(300)
+    elemente.push(overlay)
+
+    // ✨ Spiegel-Rahmen (goldener Rand!)
+    const rahmen = this.add.rectangle(breite * 0.22, hoehe * 0.42, 120, 160, 0xE8E8E8)
+    rahmen.setStrokeStyle(4, 0xFFD700)
+    rahmen.setDepth(301)
+    elemente.push(rahmen)
+
+    // 🏷️ Titel
+    const titel = this.add.text(breite / 2, hoehe * 0.06, '🪞 Spiegel – Neues Outfit! ✨', {
+      fontSize: '22px', fontFamily: 'Arial', color: '#FFD700',
+      stroke: '#000000', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(301)
+    elemente.push(titel)
+
+    // === 📋 Aktuelle Werte kopieren ===
+    const auswahl = {
+      hautfarbe: this.figurDaten.hautfarbe,
+      haarfarbe: this.figurDaten.haarfarbe,
+      haarStil: this.figurDaten.haarStil,
+      kleidungFarbe: this.figurDaten.kleidungFarbe,
+      kleidungTyp: this.figurDaten.kleidungTyp,
+      hosenFarbe: this.figurDaten.hosenFarbe,
+      schuhFarbe: this.figurDaten.schuhFarbe
+    }
+
+    // === 🧑 VORSCHAU im Spiegel ===
+    let vorschauContainer = null
+    const aktualisiereVorschau = () => {
+      if (vorschauContainer) vorschauContainer.destroy()
+      vorschauContainer = this.add.container(breite * 0.22, hoehe * 0.42)
+      vorschauContainer.setDepth(302)
+      maleFigur(this, vorschauContainer, auswahl, 2)
+      elemente.push(vorschauContainer)
+    }
+    aktualisiereVorschau()
+
+    // === 🎨 Farb-Button Helfer ===
+    const erstelleFarbKreise = (startX, y, farben, aktiveFarbe, callback) => {
+      const kreise = []
+      farben.forEach((eintrag, index) => {
+        const x = startX + index * 36
+        const kreis = this.add.circle(x, y, 13, eintrag.farbe)
+        kreis.setDepth(302)
+        if (eintrag.farbe === aktiveFarbe) {
+          kreis.setStrokeStyle(3, 0xFFD700)
+          kreis.setScale(1.15)
+        } else {
+          kreis.setStrokeStyle(2, 0x333333)
+        }
+        kreis.setInteractive({ useHandCursor: true })
+        kreis.on('pointerdown', () => {
+          kreise.forEach(k => { k.setStrokeStyle(2, 0x333333); k.setScale(1) })
+          kreis.setStrokeStyle(3, 0xFFD700)
+          kreis.setScale(1.15)
+          callback(eintrag.farbe)
+          aktualisiereVorschau()
+        })
+        kreise.push(kreis)
+        elemente.push(kreis)
+      })
+    }
+
+    // === Auswahl-Buttons (rechte Seite) ===
+    const labelX = breite * 0.40
+    const farbX = breite * 0.56
+    const startY = hoehe * 0.14
+    const abstand = 42
+
+    // --- 🧑 HAUTFARBE ---
+    const hautLabel = this.add.text(labelX, startY, '🧑 Haut:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(hautLabel)
+
+    erstelleFarbKreise(farbX, startY, [
+      { farbe: 0xFDECDA }, { farbe: 0xFFCC80 },
+      { farbe: 0xD4A574 }, { farbe: 0x8D5524 }
+    ], auswahl.hautfarbe, (f) => { auswahl.hautfarbe = f })
+
+    // --- 💇 HAARFARBE ---
+    const haarLabel = this.add.text(labelX, startY + abstand, '💇 Haare:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(haarLabel)
+
+    erstelleFarbKreise(farbX, startY + abstand, [
+      { farbe: 0xFDD835 }, { farbe: 0x5D4037 },
+      { farbe: 0x212121 }, { farbe: 0xE53935 },
+      { farbe: 0xE91E63 }
+    ], auswahl.haarfarbe, (f) => { auswahl.haarfarbe = f })
+
+    // --- ✂️ FRISUR ---
+    const frisurLabel = this.add.text(labelX, startY + abstand * 2, '✂️ Frisur:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(frisurLabel)
+
+    const frisuren = ['Kurz', 'Lang', 'Zöpfe']
+    const frisurBtns = []
+    frisuren.forEach((name, index) => {
+      const btn = this.add.text(farbX + index * 70, startY + abstand * 2, name, {
+        fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+        backgroundColor: index === auswahl.haarStil ? '#4CAF50' : '#78909C',
+        padding: { x: 8, y: 4 }
+      }).setOrigin(0, 0.5).setDepth(302)
+      btn.setInteractive({ useHandCursor: true })
+      btn.on('pointerdown', () => {
+        auswahl.haarStil = index
+        frisurBtns.forEach((b, i) => b.setBackgroundColor(i === index ? '#4CAF50' : '#78909C'))
+        aktualisiereVorschau()
+      })
+      frisurBtns.push(btn)
+      elemente.push(btn)
+    })
+
+    // --- 👕 KLEIDUNG FARBE ---
+    const kleidLabel = this.add.text(labelX, startY + abstand * 3, '👕 Kleidung:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(kleidLabel)
+
+    erstelleFarbKreise(farbX, startY + abstand * 3, [
+      { farbe: 0x2196F3 }, { farbe: 0xE53935 },
+      { farbe: 0x4CAF50 }, { farbe: 0xFFEB3B },
+      { farbe: 0x9C27B0 }, { farbe: 0xE91E63 }
+    ], auswahl.kleidungFarbe, (f) => { auswahl.kleidungFarbe = f })
+
+    // --- 👗 KLEIDUNG TYP ---
+    const typLabel = this.add.text(labelX, startY + abstand * 4, '👗 Typ:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(typLabel)
+
+    const kleidTypen = ['T-Shirt', 'Kleid', 'Hoodie']
+    const typBtns = []
+    kleidTypen.forEach((name, index) => {
+      const btn = this.add.text(farbX + index * 80, startY + abstand * 4, name, {
+        fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+        backgroundColor: index === auswahl.kleidungTyp ? '#4CAF50' : '#78909C',
+        padding: { x: 8, y: 4 }
+      }).setOrigin(0, 0.5).setDepth(302)
+      btn.setInteractive({ useHandCursor: true })
+      btn.on('pointerdown', () => {
+        auswahl.kleidungTyp = index
+        typBtns.forEach((b, i) => b.setBackgroundColor(i === index ? '#4CAF50' : '#78909C'))
+        aktualisiereVorschau()
+      })
+      typBtns.push(btn)
+      elemente.push(btn)
+    })
+
+    // --- 👖 HOSEN-FARBE ---
+    const hosenLabel = this.add.text(labelX, startY + abstand * 5, '👖 Hose:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(hosenLabel)
+
+    erstelleFarbKreise(farbX, startY + abstand * 5, [
+      { farbe: 0x37474F }, { farbe: 0x1565C0 },
+      { farbe: 0x4E342E }, { farbe: 0x212121 },
+      { farbe: 0xE91E63 }, { farbe: 0x7B1FA2 }
+    ], auswahl.hosenFarbe, (f) => { auswahl.hosenFarbe = f })
+
+    // --- 👟 SCHUHE ---
+    const schuhLabel = this.add.text(labelX, startY + abstand * 6, '👟 Schuhe:', {
+      fontSize: '15px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0, 0.5).setDepth(302)
+    elemente.push(schuhLabel)
+
+    erstelleFarbKreise(farbX, startY + abstand * 6, [
+      { farbe: 0x424242 }, { farbe: 0x212121 },
+      { farbe: 0xFFFFFF }, { farbe: 0xE53935 },
+      { farbe: 0x1565C0 }, { farbe: 0x4CAF50 }
+    ], auswahl.schuhFarbe, (f) => { auswahl.schuhFarbe = f })
+
+    // === ✅ FERTIG-BUTTON ===
+    const fertigBtn = this.add.text(breite * 0.55, hoehe * 0.88, '✅ So sehe ich gut aus!', {
+      fontSize: '20px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#4CAF50', padding: { x: 20, y: 10 },
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0.5).setDepth(302)
+    fertigBtn.setInteractive({ useHandCursor: true })
+    elemente.push(fertigBtn)
+
+    // ✨ Button pulsiert leicht
+    this.tweens.add({
+      targets: fertigBtn,
+      scale: 1.05,
+      duration: 600,
+      yoyo: true,
+      repeat: -1
+    })
+
+    fertigBtn.on('pointerdown', () => {
+      // 💾 Neue Werte in figurDaten übernehmen!
+      this.figurDaten.hautfarbe = auswahl.hautfarbe
+      this.figurDaten.haarfarbe = auswahl.haarfarbe
+      this.figurDaten.haarStil = auswahl.haarStil
+      this.figurDaten.kleidungFarbe = auswahl.kleidungFarbe
+      this.figurDaten.kleidungTyp = auswahl.kleidungTyp
+      this.figurDaten.hosenFarbe = auswahl.hosenFarbe
+      this.figurDaten.schuhFarbe = auswahl.schuhFarbe
+
+      // 💾 Speichern!
+      spielSpeichern('HausSzene', this.figurDaten, null)
+
+      // 🧹 Alle Spiegel-Elemente wegräumen
+      elemente.forEach(el => el.destroy())
+
+      // 🧑 Spieler-Figur im Raum neu malen!
+      const alteX = this.spieler.x
+      const alteY = this.spieler.y
+      this.spieler.destroy()
+      this.spieler = this.erstelleSpieler(alteX, alteY)
+
+      this.zeigeNachricht('✨ Wow, du siehst toll aus! 🌟')
+
+      // 🔊 Fröhlicher Sound!
+      spieleTon(523, 0.15, 0.1, 'sine')
+      setTimeout(() => spieleTon(659, 0.15, 0.1, 'sine'), 100)
+      setTimeout(() => spieleTon(784, 0.2, 0.1, 'sine'), 200)
+    })
+
+    // === ❌ ABBRECHEN-BUTTON ===
+    const abbrechenBtn = this.add.text(breite * 0.22, hoehe * 0.88, '❌ Doch nicht', {
+      fontSize: '16px', fontFamily: 'Arial', color: '#ffffff',
+      backgroundColor: '#616161', padding: { x: 14, y: 8 },
+      stroke: '#000000', strokeThickness: 2
+    }).setOrigin(0.5).setDepth(302)
+    abbrechenBtn.setInteractive({ useHandCursor: true })
+    elemente.push(abbrechenBtn)
+
+    abbrechenBtn.on('pointerdown', () => {
+      // 🧹 Einfach alles wegräumen, nichts speichern!
+      elemente.forEach(el => el.destroy())
+      soundKlick()
     })
   }
 

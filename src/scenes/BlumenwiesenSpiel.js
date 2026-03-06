@@ -2670,7 +2670,8 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       { name: '🪑 Stuhl', kosten: '🪵 x3', icon: '🪑' },
       { name: '🛏️ Bett', kosten: '🪵 x5 + 🪨 x1', icon: '🛏️' },
       { name: '🗄️ Tisch', kosten: '🪵 x4 + ⚙️ x2', icon: '🍽️' },
-      { name: '💡 Lampe', kosten: '⚙️ x3 + 🪨 x2', icon: '💡' }
+      { name: '💡 Lampe', kosten: '⚙️ x3 + 🪨 x2', icon: '💡' },
+      { name: '🪞 Spiegel', kosten: '🪨 x2 + ⚙️ x1', icon: '🪞' }
     ]
 
     // 🐶 Hundebett nur zeigen wenn Bello gerettet wurde!
@@ -2742,6 +2743,9 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
     // 💻 Computer – damit kann man mit Milo spielen und chatten!
     moebel.push({ name: "Computer", emoji: "💻", holz: 2, stein: 2, eisen: 3 })
+
+    // 🪞 Spiegel – damit kann man sein Aussehen ändern!
+    moebel.push({ name: "Spiegel", emoji: "🪞", holz: 0, stein: 2, eisen: 1 })
 
     const elemente = [overlay, titel]
 
