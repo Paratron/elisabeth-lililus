@@ -3,7 +3,7 @@
 // =============================================================
 
 // 🎒 Der Rucksack – gehört dem Spieler, egal wo er ist!
-export const rucksack = { holz: 0, stein: 0, eisen: 0, pizza: 0 }
+export const rucksack = { holz: 0, stein: 0, eisen: 0, pizza: 0, edelsteine: 0 }
 
 // 🏠 Haus-Daten – bleiben erhalten wenn man rein- und rausgeht!
 export const hausDaten = {
@@ -143,6 +143,7 @@ export function spielstandWiederherstellen(stand) {
     rucksack.stein = stand.rucksack.stein || 0
     rucksack.eisen = stand.rucksack.eisen || 0
     rucksack.pizza = stand.rucksack.pizza || 0
+    rucksack.edelsteine = stand.rucksack.edelsteine || 0
   }
   if (stand.hausDaten) {
     hausDaten.wandFarbe = stand.hausDaten.wandFarbe ?? 0x8D6E63

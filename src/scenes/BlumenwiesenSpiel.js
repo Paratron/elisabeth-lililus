@@ -1087,6 +1087,9 @@ class BlumenwiesenSpiel extends Phaser.Scene {
               // Edelstein = Konfetti-Feier! 🎉
               if (fund.typ === 'edelstein') {
                 this.konfetti()
+                // 💎 Edelstein einsammeln!
+                this.rucksack.edelsteine = (this.rucksack.edelsteine || 0) + 1
+                this.rucksackAnzeige.setText(this.getRucksackText())
               }
 
               // Emoji langsam verschwinden lassen
@@ -2186,6 +2189,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     if (this.hausGebaut) {
       // 🏠 Haus ist fertig – zeige nur die Anzahl!
       let text = `🎒 Rucksack:\n🪵 ${this.rucksack.holz}  🪨 ${this.rucksack.stein}  ⚙️ ${this.rucksack.eisen}`
+      if (rucksack.edelsteine > 0) text += `  💎${rucksack.edelsteine}`
       if (rucksack.pizza > 0) text += `  🍕${rucksack.pizza}`
       return text
     }
