@@ -6555,33 +6555,72 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     this.hundZielY = null
     this.hundWartet = false
 
+    // 🐕 Bello antippbar machen! Klick-Bereich ist der Körper
+    koerper.setInteractive({ useHandCursor: true })
+    kopf.setInteractive({ useHandCursor: true })
+
+    // 🐾 Verschiedene Bell-Sprüche!
+    const bellSprueche = [
+      '🐕 Wuff wuff!',
+      '🐶 Wau wau!',
+      '🐕 Wuff!',
+      '🐶 WUUUFF!',
+      '🐕 Hechel hechel! 😛',
+      '🐶 *schwanzwedel* 💕',
+      '🐕 Wuff wau wuff!',
+      '🐶 Jauuul! 🎵',
+      '🐕 *schleck schleck* 😋',
+      '🐶 Wiff! Wiff!',
+    ]
+
+    // 🐕 Bello-Bell-Funktion (zeigt Sprechblase + Sound)
+    const belloMachtWuff = () => {
+      if (!this.hund || !this.hund.active) return
+      soundBellen()
+      // 💬 Zufälliger Bell-Spruch über Bello!
+      const spruch = Phaser.Math.RND.pick(bellSprueche)
+      const wuff = this.add.text(this.hund.x, this.hund.y - 35, spruch, {
+        fontSize: '13px', fontFamily: 'Arial', color: '#ffffff',
+        stroke: '#000000', strokeThickness: 3,
+        backgroundColor: '#5D403799', padding: { x: 6, y: 3 }
+      }).setOrigin(0.5).setDepth(100)
+      // 💬 Sprechblase schwebt hoch und verschwindet!
+      this.tweens.add({
+        targets: wuff,
+        y: wuff.y - 25,
+        alpha: 0,
+        duration: 2000,
+        delay: 1000,
+        onComplete: () => wuff.destroy()
+      })
+    }
+
+    // 🐾 Wenn man auf Bello tippt: Er bellt und hüpft!
+    const belloAngetippt = () => {
+      belloMachtWuff()
+      // 🐕 Bello hüpft vor Freude!
+      this.tweens.add({
+        targets: hund,
+        y: hund.y - 15,
+        duration: 200,
+        yoyo: true,
+        ease: 'Quad.easeOut'
+      })
+    }
+    koerper.on('pointerdown', belloAngetippt)
+    kopf.on('pointerdown', belloAngetippt)
+
     // 🐕 Bello läuft nach 2 Sekunden los!
     this.time.delayedCall(2000, () => {
       this.setzeBelloNeuesZiel()
     })
 
-    // 🔊 Bello bellt ab und zu! (alle 8-15 Sekunden)
+    // 🔊 Bello bellt auch von alleine! (alle 10-20 Sekunden zufällig)
     this.time.addEvent({
-      delay: 8000,
+      delay: Phaser.Math.Between(10000, 20000),
       loop: true,
       callback: () => {
-        if (this.hund && this.hund.active) {
-          soundBellen()
-          // 💬 Sprechblase "Wuff!" über dem Hund
-          const wuff = this.add.text(this.hund.x, this.hund.y - 30, '🐕 Wuff!', {
-            fontSize: '12px', fontFamily: 'Arial', color: '#ffffff',
-            stroke: '#000000', strokeThickness: 3,
-            backgroundColor: '#5D403799', padding: { x: 4, y: 2 }
-          }).setOrigin(0.5).setDepth(100)
-          this.tweens.add({
-            targets: wuff,
-            y: wuff.y - 20,
-            alpha: 0,
-            duration: 1500,
-            delay: 800,
-            onComplete: () => wuff.destroy()
-          })
-        }
+        belloMachtWuff()
       }
     })
   }
