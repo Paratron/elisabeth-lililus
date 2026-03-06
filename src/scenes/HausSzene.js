@@ -2216,6 +2216,7 @@ class HausSzene extends Phaser.Scene {
           this.schlaft = false
           // ☀️ Nach dem Schlafen ist es Morgen!
           hausDaten.tagesZeit = 'morgen'
+          hausDaten.tagesZeitSeit = Date.now() // ⏰ Zeitstempel merken!
           // 🌱 Merken: Kinder sollen auf der Wiese wachsen!
           hausDaten.kinderSollenWachsen = true
         })

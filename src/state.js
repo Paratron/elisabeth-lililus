@@ -18,7 +18,8 @@ export const hausDaten = {
   freundDachFarbe: 0x4CAF50, // 🎨 Dachfarbe vom Freund-Haus
   hundGerettet: false, // 🐕 Wurde der Hund schon gerettet?
   welpenGeboren: false, // 🐾 Hat Bello schon Welpen bekommen?
-  tagesZeit: 'tag', // ☀️ Aktuelle Tageszeit: 'morgen', 'tag', 'abend', 'nacht'
+  tagesZeit: 'tag', // ☀️ Aktuelle Tageszeit: 'morgen', 'tag', 'nachmittag', 'abend', 'nacht'
+  tagesZeitSeit: 0, // ⏰ Wann hat die aktuelle Tageszeit angefangen? (Date.now())
   miloWachstum: 0, // 🌱 Milo wächst jeden Tag! (0=Baby, 1-4=wächst, 5=groß wie du!)
   miloKleidung: { // 👗 Milos Kleidung – kann man im Laden kaufen!
     kleidungFarbe: 0xFF7043, // 🎨 Standard: Orange (sein Hemd)
@@ -62,6 +63,7 @@ export function spielSpeichern(szene, figurDaten, spielerPos) {
         hundGerettet: hausDaten.hundGerettet,
         welpenGeboren: hausDaten.welpenGeboren,
         tagesZeit: hausDaten.tagesZeit,
+        tagesZeitSeit: hausDaten.tagesZeitSeit,
         miloWachstum: hausDaten.miloWachstum,
         miloKleidung: hausDaten.miloKleidung,
         miloBrauchtHilfe: hausDaten.miloBrauchtHilfe,
@@ -155,6 +157,7 @@ export function spielstandWiederherstellen(stand) {
     hausDaten.hundGerettet = stand.hausDaten.hundGerettet || false
     hausDaten.welpenGeboren = stand.hausDaten.welpenGeboren || false
     hausDaten.tagesZeit = stand.hausDaten.tagesZeit || 'tag'
+    hausDaten.tagesZeitSeit = stand.hausDaten.tagesZeitSeit || 0
     hausDaten.miloWachstum = stand.hausDaten.miloWachstum || 0
     hausDaten.miloKleidung = stand.hausDaten.miloKleidung || {
       kleidungFarbe: 0xFF7043,

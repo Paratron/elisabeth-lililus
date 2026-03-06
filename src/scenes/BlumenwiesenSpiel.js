@@ -1277,6 +1277,30 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
   // ⏰ Tag-Nacht-Zyklus starten! Alle 60 Sekunden wechselt die Tageszeit
   starteTagNachtZyklus() {
+    // ⏰ Prüfen ob genug Zeit vergangen ist seit dem letzten Tageszeit-Wechsel!
+    // Das ist wichtig weil der Timer bei Szenenwechsel (Haus rein/raus) zurückgesetzt wird!
+    const jetzt = Date.now()
+    const vergangen = jetzt - (hausDaten.tagesZeitSeit || 0)
+    const WECHSEL_ZEIT = 30000 // 30 Sekunden pro Phase
+
+    // ⏩ Wenn genug Zeit vergangen ist: Sofort weiterspringen!
+    if (hausDaten.tagesZeitSeit > 0 && vergangen >= WECHSEL_ZEIT && hausDaten.tagesZeit !== 'nacht') {
+      // Wie viele Phasen sind vergangen?
+      const phasen = Math.floor(vergangen / WECHSEL_ZEIT)
+      const reihenfolge = ['morgen', 'tag', 'nachmittag', 'abend', 'nacht']
+      let index = reihenfolge.indexOf(hausDaten.tagesZeit)
+      for (let i = 0; i < phasen && index < 4; i++) {
+        index++
+      }
+      hausDaten.tagesZeit = reihenfolge[index]
+      hausDaten.tagesZeitSeit = jetzt
+    }
+
+    // Wenn noch kein Zeitstempel da ist: Jetzt setzen!
+    if (!hausDaten.tagesZeitSeit) {
+      hausDaten.tagesZeitSeit = jetzt
+    }
+
     // Gleich die richtige Farbe setzen
     this.setzeTagesZeitFarbe()
 
@@ -1362,6 +1386,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
           // ⏰ Tageszeit wechseln!
           const alteZeit = hausDaten.tagesZeit
           hausDaten.tagesZeit = zeit.id
+          hausDaten.tagesZeitSeit = Date.now() // ⏰ Zeitstempel merken!
 
           // 🧹 Menü schließen
           elemente.forEach(el => el.destroy())
@@ -1764,6 +1789,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     }
 
     hausDaten.tagesZeit = naechste
+    hausDaten.tagesZeitSeit = Date.now() // ⏰ Merken wann die Zeit gewechselt hat!
 
     // Sanfter Übergang mit Animation!
     const farben = {
@@ -1942,6 +1968,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
       // ☀️ Morgen! Tageszeit wechseln!
       hausDaten.tagesZeit = 'morgen'
+      hausDaten.tagesZeitSeit = Date.now() // ⏰ Zeitstempel merken!
 
       // 🎨 Himmel wird hell!
       this.cameras.main.setBackgroundColor('#F5A040')
@@ -2072,6 +2099,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       this.maleMond(mondX, mondY)
       this.istNacht = true
       hausDaten.tagesZeit = 'nacht'
+      hausDaten.tagesZeitSeit = Date.now() // ⏰ Zeitstempel merken!
       if (danach) danach()
     })
   }
@@ -2141,6 +2169,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       this.maleSonne(sonneX, sonneY)
       this.istNacht = false
       hausDaten.tagesZeit = 'tag'
+      hausDaten.tagesZeitSeit = Date.now() // ⏰ Zeitstempel merken!
       const vogelToene = [800, 1000, 900, 1100, 850]
       vogelToene.forEach((note, i) => {
         setTimeout(() => spieleTon(note, 0.1, 0.03, 'sine'), i * 200)
@@ -3107,8 +3136,15 @@ class BlumenwiesenSpiel extends Phaser.Scene {
   // === 🧑 FREUND ERSTELLEN (die gerettete Person) ===
   // 🌱 Milo wächst jeden Tag! Stufe 0=Baby, 5=sieht aus wie du!
   erstelleFreund() {
-    const startX = this.hausPosition ? this.hausPosition.x + 50 : this.scale.width / 2 + 130
-    const startY = this.wiesenY + 60
+    // 🌅 Wenn es Morgen oder Tag ist: Milo startet irgendwo auf der Wiese (läuft schon rum!)
+    const weltBreiteFreund = this.weltBreite || this.scale.width * 2
+    const istTagsUeber = hausDaten.tagesZeit !== 'nacht'
+    const startX = istTagsUeber
+      ? Phaser.Math.Between(100, weltBreiteFreund - 100)
+      : (this.hausPosition ? this.hausPosition.x + 50 : this.scale.width / 2 + 130)
+    const startY = istTagsUeber
+      ? Phaser.Math.Between(this.wiesenY + 20, this.scale.height - 40)
+      : this.wiesenY + 60
 
     const freund = this.add.container(startX, startY)
 
@@ -3486,7 +3522,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
           // 🚶 Milo läuft wieder frei herum!
           this.freundWartet = false
-          this.time.delayedCall(5000, () => {
+          this.time.delayedCall(1500, () => {
             this.setzeMiloNeuesZiel()
           })
 
@@ -3542,7 +3578,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
           // 🚶 Milo läuft wieder frei herum!
           this.freundWartet = false
-          this.time.delayedCall(4000, () => {
+          this.time.delayedCall(1000, () => {
             this.setzeMiloNeuesZiel()
           })
 
