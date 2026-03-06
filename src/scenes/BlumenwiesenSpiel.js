@@ -1237,10 +1237,11 @@ class BlumenwiesenSpiel extends Phaser.Scene {
   // 🎨 Himmelfarbe basierend auf aktueller Tageszeit setzen
   setzeTagesZeitFarbe() {
     const farben = {
-      'morgen': '#F5A040',  // 🌅 Orange-Morgen
-      'tag': '#87CEEB',     // ☀️ Hellblau
-      'abend': '#E86838',   // 🌇 Rot-Orange
-      'nacht': '#1A237E'    // 🌙 Dunkelblau
+      'morgen': '#F5A040',      // 🌅 Orange-Morgen
+      'tag': '#87CEEB',         // ☀️ Hellblau
+      'nachmittag': '#E8C86E',  // 🌤️ Goldener Nachmittag
+      'abend': '#E86838',       // 🌇 Rot-Orange
+      'nacht': '#1A237E'        // 🌙 Dunkelblau
     }
     const farbe = farben[hausDaten.tagesZeit] || '#87CEEB'
     this.cameras.main.setBackgroundColor(farbe)
@@ -1288,12 +1289,138 @@ class BlumenwiesenSpiel extends Phaser.Scene {
       }
     })
 
-    // 🕐 Uhr-Anzeige oben in der Mitte
+    // 🕐 Uhr-Anzeige oben in der Mitte (antippbar!)
     this.zeitAnzeige = this.add.text(this.scale.width / 2, 8, '', {
       fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
-      stroke: '#000000', strokeThickness: 3
+      stroke: '#000000', strokeThickness: 3,
+      backgroundColor: '#00000044', padding: { x: 8, y: 3 }
     }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(100)
+    this.zeitAnzeige.setInteractive({ useHandCursor: true })
+    this.zeitAnzeige.on('pointerdown', () => {
+      this.zeigeTagesZeitAuswahl()
+    })
     this.aktualisiereZeitAnzeige()
+  }
+
+  // === ⏰ TAGESZEIT-AUSWAHL – Wähle die Tageszeit! ===
+  zeigeTagesZeitAuswahl() {
+    // 🚫 Nicht öffnen wenn schon offen!
+    if (this.tageszeitMenu) return
+
+    const breite = this.scale.width
+    const hoehe = this.scale.height
+    const elemente = []
+
+    // 🌑 Dunkler Hintergrund
+    const overlay = this.add.rectangle(breite / 2, hoehe / 2, breite, hoehe, 0x000000, 0.5)
+    overlay.setScrollFactor(0).setDepth(400)
+    elemente.push(overlay)
+
+    // 🏷️ Titel
+    const titel = this.add.text(breite / 2, hoehe * 0.12, '⏰ Welche Tageszeit möchtest du?', {
+      fontSize: '22px', fontFamily: 'Arial', color: '#FFD700',
+      stroke: '#000000', strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(401)
+    elemente.push(titel)
+
+    // ☀️ Die verschiedenen Tageszeiten zum Auswählen!
+    const zeiten = [
+      { id: 'morgen',     label: '🌅 Morgen',      farbe: '#F5A040' },
+      { id: 'tag',        label: '☀️ Tag',          farbe: '#87CEEB' },
+      { id: 'nachmittag', label: '🌤️ Nachmittag',  farbe: '#E8C86E' },
+      { id: 'abend',      label: '🌇 Abend',       farbe: '#E86838' },
+      { id: 'nacht',      label: '🌙 Nacht',       farbe: '#1A237E' }
+    ]
+
+    zeiten.forEach((zeit, i) => {
+      const y = hoehe * 0.28 + i * 60
+      const istAktiv = hausDaten.tagesZeit === zeit.id
+
+      // 🎨 Farbiger Hintergrund-Streifen
+      const bg = this.add.rectangle(breite / 2, y, breite * 0.65, 48, 
+        Phaser.Display.Color.HexStringToColor(zeit.farbe).color, istAktiv ? 1 : 0.7)
+      bg.setScrollFactor(0).setDepth(401)
+      bg.setStrokeStyle(istAktiv ? 4 : 2, istAktiv ? 0xFFD700 : 0xffffff)
+
+      const text = this.add.text(breite / 2, y, zeit.label, {
+        fontSize: istAktiv ? '22px' : '20px', fontFamily: 'Arial', 
+        color: zeit.id === 'nacht' ? '#FFD700' : '#ffffff',
+        stroke: '#000000', strokeThickness: 3
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(402)
+
+      // ⭐ Aktuell ausgewählte Zeit markieren
+      if (istAktiv) {
+        const stern = this.add.text(breite * 0.22, y, '👉', {
+          fontSize: '20px'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(402)
+        elemente.push(stern)
+      }
+
+      if (!istAktiv) {
+        bg.setInteractive({ useHandCursor: true })
+        bg.on('pointerdown', () => {
+          // ⏰ Tageszeit wechseln!
+          const alteZeit = hausDaten.tagesZeit
+          hausDaten.tagesZeit = zeit.id
+
+          // 🧹 Menü schließen
+          elemente.forEach(el => el.destroy())
+          this.tageszeitMenu = null
+
+          // 🎨 Himmelfarbe ändern!
+          this.setzeTagesZeitFarbe()
+          this.aktualisiereZeitAnzeige()
+
+          // 💬 Nachricht zeigen
+          const nachrichten = {
+            'morgen': '🌅 Es wird Morgen! Guten Morgen! ☀️',
+            'tag': '☀️ Die Sonne scheint! Guten Tag!',
+            'nachmittag': '🌤️ Es ist Nachmittag! ☕',
+            'abend': '🌇 Es wird Abend... So schön! 🧡',
+            'nacht': '🌙 Es ist Nacht... Die Sterne leuchten! ⭐'
+          }
+          this.zeigeNachricht(nachrichten[zeit.id])
+
+          // 🌙 Nacht: Milo schlafen legen + Schlafen-Button zeigen
+          if (zeit.id === 'nacht') {
+            if (!this.miloSchlaeft && this.freund && this.freund.active && this.freundHausPosition) {
+              this.time.delayedCall(1000, () => this.miloGehtSchlafen())
+            }
+            this.time.delayedCall(2000, () => {
+              if (!this.schlafenButton) this.zeigeSchlafenButton()
+            })
+          }
+
+          // 🌅 Morgen: Milo aufwecken + Kinder wachsen
+          if (zeit.id === 'morgen' && alteZeit === 'nacht') {
+            if (this.freund) this.miloWachtAuf()
+            this.kinderWachsenLassen()
+          }
+
+          // 💾 Speichern!
+          spielSpeichern('BlumenwiesenSpiel', this.figurDaten, {
+            x: this.spieler.x, y: this.spieler.y
+          })
+        })
+      }
+
+      elemente.push(bg, text)
+    })
+
+    // ❌ Schließen-Button
+    const schliessen = this.add.text(breite / 2, hoehe * 0.88, '❌ Zurück', {
+      fontSize: '20px', fontFamily: 'Arial', color: '#ffffff',
+      stroke: '#000000', strokeThickness: 3,
+      backgroundColor: '#616161', padding: { x: 16, y: 8 }
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(402)
+    schliessen.setInteractive({ useHandCursor: true })
+    schliessen.on('pointerdown', () => {
+      elemente.forEach(el => el.destroy())
+      this.tageszeitMenu = null
+    })
+    elemente.push(schliessen)
+
+    this.tageszeitMenu = true
   }
 
   // === 😅 MILO HAT MANCHMAL SCHWIERIGKEITEN ===
@@ -1623,9 +1750,9 @@ class BlumenwiesenSpiel extends Phaser.Scene {
 
   // 🔄 Nächste Tageszeit!
   naechsteTagesZeit() {
-    const reihenfolge = ['morgen', 'tag', 'abend', 'nacht']
+    const reihenfolge = ['morgen', 'tag', 'nachmittag', 'abend', 'nacht']
     const jetzt = reihenfolge.indexOf(hausDaten.tagesZeit)
-    const naechste = reihenfolge[(jetzt + 1) % 4]
+    const naechste = reihenfolge[(jetzt + 1) % 5]
 
     // 🌙 Nacht bleibt bis du aufwachst! Nicht automatisch weiter!
     if (hausDaten.tagesZeit === 'nacht') {
@@ -1642,12 +1769,14 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     const farben = {
       'morgen': '#F5A040',
       'tag': '#87CEEB',
+      'nachmittag': '#E8C86E',
       'abend': '#E86838',
       'nacht': '#1A237E'
     }
     const nachrichten = {
       'morgen': '🌅 Es wird Morgen!',
       'tag': '☀️ Guten Tag!',
+      'nachmittag': '🌤️ Guten Nachmittag!',
       'abend': '🌇 Es wird Abend...',
       'nacht': '🌙 Gute Nacht!'
     }
@@ -1887,6 +2016,7 @@ class BlumenwiesenSpiel extends Phaser.Scene {
     const uhren = {
       'morgen': '🌅 Morgen',
       'tag': '☀️ Tag',
+      'nachmittag': '🌤️ Nachmittag',
       'abend': '🌇 Abend',
       'nacht': '🌙 Nacht'
     }
