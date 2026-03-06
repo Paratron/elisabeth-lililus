@@ -922,118 +922,110 @@ class HausSzene extends Phaser.Scene {
     const breite = this.scale.width
     const hoehe = this.scale.height
 
-    // 📺 Alle Blitz-Folgen!
+    // 📺 Alle Blitz-Folgen mit Landschaften, Figuren und Dialogen!
     const folgen = [
       {
         titel: 'Folge 1: Der große Regen',
         szenen: [
-          { text: '🦔 Blitz der kleine Igel wacht auf...', emoji: '🦔', bg: 0x4CAF50, dauer: 3000 },
-          { text: '☁️ "Oh nein! Es regnet!"', emoji: '🌧️', bg: 0x546E7A, dauer: 2500 },
-          { text: '🦔 Blitz läuft los! Er sucht einen trockenen Platz!', emoji: '🏃', bg: 0x546E7A, dauer: 2500 },
-          { text: '🍄 Er findet einen riesigen Pilz!', emoji: '🍄', bg: 0x795548, dauer: 2500 },
-          { text: '🦔 "Perfekt!" Blitz kuschelt sich drunter!', emoji: '🦔', bg: 0x795548, dauer: 2500 },
-          { text: '🐌 Eine Schnecke kommt vorbei!\n"Darf ich auch drunter?"', emoji: '🐌', bg: 0x795548, dauer: 3000 },
-          { text: '🦔 "Na klar!" Zusammen ist es\nviel gemütlicher! 💕', emoji: '🦔🐌', bg: 0x795548, dauer: 3000 },
-          { text: '☀️ Der Regen hört auf!\nEin Regenbogen erscheint! 🌈', emoji: '🌈', bg: 0x42A5F5, dauer: 3000 },
-          { text: '🦔 "Was für ein toller Tag!" 🎉', emoji: '⭐', bg: 0x42A5F5, dauer: 3000 },
+          { erzaehler: 'Es war einmal ein kleiner Igel namens Blitz...', figuren: ['🦔'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Oh nein! Es fängt an zu regnen!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'regen', dauer: 4000 },
+          { erzaehler: 'Blitz lief so schnell er konnte durch den Regen!', figuren: ['🦔'], landschaft: 'regen', dauer: 4000 },
+          { dialog: 'Guck mal! Ein riesiger Pilz! Darunter bleibe ich trocken!', sprecher: '🦔', figuren: ['🦔', '🍄'], landschaft: 'regen', dauer: 5000 },
+          { dialog: 'Hallo! Darf ich auch unter den Pilz? Ich bin ganz nass!', sprecher: '🐌', figuren: ['🦔', '🐌'], landschaft: 'regen', dauer: 5000 },
+          { dialog: 'Na klar! Zusammen ist es viel gemütlicher!', sprecher: '🦔', figuren: ['🦔', '🐌'], landschaft: 'regen', dauer: 4000 },
+          { erzaehler: 'Und dann hörte der Regen auf... Ein wunderschöner Regenbogen erschien am Himmel! 🌈', figuren: ['🦔', '🐌'], landschaft: 'wiese', dauer: 5000 },
+          { dialog: 'Was für ein toller Tag! Ich hab eine neue Freundin!', sprecher: '🦔', figuren: ['🦔', '🐌'], landschaft: 'wiese', dauer: 4000 },
         ]
       },
       {
         titel: 'Folge 2: Der Schatz im Wald',
         szenen: [
-          { text: '🦔 Blitz spaziert durch den Wald...', emoji: '🦔', bg: 0x2E7D32, dauer: 2500 },
-          { text: '🗺️ Er findet eine alte Karte!', emoji: '🗺️', bg: 0x2E7D32, dauer: 2500 },
-          { text: '🦔 "Ein Schatz?!" Blitz ist aufgeregt!', emoji: '😲', bg: 0x33691E, dauer: 2500 },
-          { text: '🌳 Er folgt der Karte zum großen Baum!', emoji: '🌳', bg: 0x33691E, dauer: 2500 },
-          { text: '🕳️ Am Baum ist ein Loch! Er guckt rein...', emoji: '👀', bg: 0x4E342E, dauer: 2500 },
-          { text: '✨ ES GLITZERT! Ein wunderschöner Stein!', emoji: '💎', bg: 0x4E342E, dauer: 3000 },
-          { text: '🦔 Blitz nimmt den Stein mit nach Hause!', emoji: '🦔', bg: 0x2E7D32, dauer: 2500 },
-          { text: '🌙 Nachts leuchtet der Stein ganz sanft... ✨', emoji: '✨', bg: 0x1a237e, dauer: 3000 },
-          { text: '🦔 Blitz schläft ein mit einem Lächeln! 😊', emoji: '💤', bg: 0x1a237e, dauer: 3000 },
+          { erzaehler: 'Blitz spazierte gemütlich durch den dunklen Wald...', figuren: ['🦔'], landschaft: 'wald', dauer: 4000 },
+          { dialog: 'Was ist das? Eine alte Karte! Da steht ein X drauf!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'wald', dauer: 5000 },
+          { erzaehler: 'Blitz folgte der Karte immer tiefer in den Wald...', figuren: ['🦔'], landschaft: 'wald', dauer: 4000 },
+          { dialog: 'Das X zeigt auf diesen großen Baum! Da ist ein Loch!', sprecher: '🦔', figuren: ['🦔', '🌳'], landschaft: 'wald', dauer: 5000 },
+          { erzaehler: 'Blitz schaute vorsichtig in das Loch... und da glitzerte etwas!', figuren: ['🦔'], landschaft: 'hoehle', dauer: 4000 },
+          { dialog: 'WOW! Ein wunderschöner leuchtender Stein! Der ist ja magisch!', sprecher: '🦔', figuren: ['🦔', '💎'], landschaft: 'hoehle', dauer: 5000 },
+          { erzaehler: 'Blitz nahm den Stein mit nach Hause. In der Nacht leuchtete er ganz sanft...', figuren: ['🦔'], landschaft: 'nacht', dauer: 5000 },
+          { dialog: 'Mit dir schlafe ich nie mehr im Dunkeln! Gute Nacht, kleiner Stein!', sprecher: '🦔', figuren: ['🦔', '💎'], landschaft: 'nacht', dauer: 5000 },
         ]
       },
       {
         titel: 'Folge 3: Die Pizza-Party',
         szenen: [
-          { text: '🦔 Blitz hat eine TOLLE Idee!', emoji: '💡', bg: 0xFF8F00, dauer: 2500 },
-          { text: '🍕 "Ich mache eine Pizza-Party!"', emoji: '🍕', bg: 0xE65100, dauer: 2500 },
-          { text: '🧀 Er sammelt Tomaten und Käse!', emoji: '🍅', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🍕 Blitz backt die Pizza!\nEs duftet soooo gut! 😋', emoji: '🍕', bg: 0xE65100, dauer: 3000 },
-          { text: '🐿️ Das Eichhörnchen riecht es!\n"Mmmh was ist das?!"', emoji: '🐿️', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🐰 Auch der Hase kommt angehoppelt!', emoji: '🐰', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🦔🐿️🐰 Alle essen zusammen Pizza!\n"LECKER!" 🍕', emoji: '🍕', bg: 0xE65100, dauer: 3000 },
-          { text: '🎉 Die beste Party EVER!', emoji: '🎉', bg: 0xE65100, dauer: 2500 },
-          { text: '🦔 "Morgen machen wir das wieder!" 🍕💕', emoji: '⭐', bg: 0xFF8F00, dauer: 3000 },
+          { dialog: 'Ich habe eine TOLLE Idee! Ich mache eine Pizza-Party!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'wiese', dauer: 4000 },
+          { erzaehler: 'Blitz sammelte Tomaten und Käse aus seinem Garten!', figuren: ['🦔', '🍅'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'So! Jetzt ab in den Ofen! Das wird die BESTE Pizza!', sprecher: '🦔', figuren: ['🦔', '🍕'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Mmmh! Was riecht denn hier so lecker?!', sprecher: '🐿️', figuren: ['🦔', '🐿️'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Ich rieche das bis zu mir! Darf ich auch ein Stück?', sprecher: '🐰', figuren: ['🦔', '🐿️', '🐰'], landschaft: 'wiese', dauer: 5000 },
+          { dialog: 'Na klar! Pizza schmeckt mit Freunden am allerbesten!', sprecher: '🦔', figuren: ['🦔', '🐿️', '🐰'], landschaft: 'party', dauer: 4000 },
+          { erzaehler: 'Alle aßen zusammen Pizza und hatten den besten Abend ever! 🍕🎉', figuren: ['🦔', '🐿️', '🐰'], landschaft: 'party', dauer: 5000 },
+          { dialog: 'Morgen machen wir das wieder! Pizza-Party JEDEN Tag!', sprecher: '🦔', figuren: ['🦔', '🐿️', '🐰'], landschaft: 'party', dauer: 4000 },
         ]
       },
       {
         titel: 'Folge 4: Blitz lernt fliegen',
         szenen: [
-          { text: '🦋 Ein Schmetterling fliegt vorbei...', emoji: '🦋', bg: 0x42A5F5, dauer: 2500 },
-          { text: '🦔 "Ich will auch fliegen!"', emoji: '🦔', bg: 0x42A5F5, dauer: 2500 },
-          { text: '🏔️ Blitz klettert auf einen Hügel!', emoji: '🦔', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🦔 Er springt... und fällt runter! 😅', emoji: '💥', bg: 0x795548, dauer: 2500 },
-          { text: '🐦 "Du brauchst Flügel!" sagt ein Vogel.', emoji: '🐦', bg: 0x42A5F5, dauer: 2500 },
-          { text: '💡 Blitz hat eine Idee!', emoji: '💡', bg: 0xFF8F00, dauer: 2000 },
-          { text: '🍃 Er bastelt sich Flügel aus Blättern!', emoji: '🍃', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🦔🍃 Er springt... und GLEITET! WOHOOO!', emoji: '🦔', bg: 0x42A5F5, dauer: 3000 },
-          { text: '🎉 "Ich bin GEFLOGEN!" 🐦🦋 Alle klatschen!\n\nNaja... fast! 😄', emoji: '⭐', bg: 0x42A5F5, dauer: 3500 },
+          { erzaehler: 'Ein wunderschöner Schmetterling flog an Blitz vorbei...', figuren: ['🦔', '🦋'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Das sieht so toll aus! Ich will auch fliegen können!', sprecher: '🦔', figuren: ['🦔', '🦋'], landschaft: 'wiese', dauer: 4000 },
+          { erzaehler: 'Blitz kletterte auf einen hohen Hügel und sprang!', figuren: ['🦔'], landschaft: 'berg', dauer: 4000 },
+          { dialog: 'AAAAAH! Okay, das war keine gute Idee!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'berg', dauer: 4000 },
+          { dialog: 'Du brauchst Flügel, kleiner Igel! So wie ich!', sprecher: '🐦', figuren: ['🦔', '🐦'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Ich hab eine Idee! Ich bastle mir Flügel aus Blättern!', sprecher: '🦔', figuren: ['🦔', '🍃'], landschaft: 'wald', dauer: 5000 },
+          { erzaehler: 'Blitz sprang noch einmal... und GLEITETE durch die Luft! WOHOOO!', figuren: ['🦔', '🐦', '🦋'], landschaft: 'berg', dauer: 5000 },
+          { dialog: 'Ich bin GEFLOGEN! Naja... fast! Aber es war TOLL!', sprecher: '🦔', figuren: ['🦔', '🐦', '🦋'], landschaft: 'wiese', dauer: 5000 },
         ]
       },
       {
         titel: 'Folge 5: Die Sternschnuppe',
         szenen: [
-          { text: '🌙 Es ist Nacht. Blitz kann nicht schlafen...', emoji: '🌙', bg: 0x1a237e, dauer: 2500 },
-          { text: '🦔 Er geht nach draußen und schaut hoch!', emoji: '🦔', bg: 0x1a237e, dauer: 2500 },
-          { text: '⭐ WOW! So viele Sterne!', emoji: '⭐', bg: 0x0D47A1, dauer: 2500 },
-          { text: '🌟 Ein Stern blinkt ganz hell!\n"Blinkt der nur für mich?"', emoji: '🌟', bg: 0x0D47A1, dauer: 3000 },
-          { text: '💫 EINE STERNSCHNUPPE!!!', emoji: '💫', bg: 0x0D47A1, dauer: 2500 },
-          { text: '🦔 Schnell! Blitz wünscht sich was!', emoji: '🦔', bg: 0x1a237e, dauer: 2500 },
-          { text: '💕 "Ich wünsche mir...\ndass alle meine Freunde\nglücklich sind!"', emoji: '💕', bg: 0x1a237e, dauer: 3500 },
-          { text: '⭐ Die Sterne leuchten noch heller! ✨', emoji: '✨', bg: 0x0D47A1, dauer: 2500 },
-          { text: '🦔 Blitz lächelt und geht schlafen.\nMorgen wird ein toller Tag! 😊', emoji: '⭐', bg: 0x1a237e, dauer: 3500 },
+          { erzaehler: 'Es war eine klare Nacht. Blitz konnte nicht schlafen...', figuren: ['🦔'], landschaft: 'nacht', dauer: 4000 },
+          { dialog: 'WOW! So viele Sterne! Die sind wunderschön!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'nacht', dauer: 4000 },
+          { dialog: 'Guck mal, der eine Stern blinkt ganz hell! Blinkt der nur für mich?', sprecher: '🦔', figuren: ['🦔', '⭐'], landschaft: 'nacht', dauer: 5000 },
+          { erzaehler: 'Plötzlich! Eine Sternschnuppe flog über den Himmel! 💫', figuren: ['🦔'], landschaft: 'nacht', dauer: 4000 },
+          { dialog: 'EINE STERNSCHNUPPE! Schnell, ich muss mir was wünschen!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'nacht', dauer: 4000 },
+          { dialog: 'Ich wünsche mir... dass alle meine Freunde immer glücklich sind!', sprecher: '🦔', figuren: ['🦔', '⭐'], landschaft: 'nacht', dauer: 5000 },
+          { erzaehler: 'Die Sterne leuchteten noch heller! Als ob sie sich bedanken wollten...', figuren: ['🦔'], landschaft: 'nacht', dauer: 5000 },
+          { dialog: 'Gute Nacht, liebe Sterne! Morgen wird ein toller Tag!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'nacht', dauer: 4000 },
         ]
       },
       {
         titel: 'Folge 6: Der mutige Igel',
         szenen: [
-          { text: '🐿️ Das Eichhörnchen ruft um Hilfe!\n"Meine Nüsse sind weg!"', emoji: '🐿️', bg: 0x4CAF50, dauer: 3000 },
-          { text: '🦔 Blitz kommt angerannt!\n"Ich helfe dir!"', emoji: '🦔', bg: 0x4CAF50, dauer: 2500 },
-          { text: '🔍 Blitz folgt den Spuren im Gras...', emoji: '🔍', bg: 0x2E7D32, dauer: 2500 },
-          { text: '🕳️ Die Spuren führen zu einer dunklen Höhle!', emoji: '🕳️', bg: 0x37474F, dauer: 2500 },
-          { text: '🦔 Blitz schluckt... aber er geht rein!\nEr ist mutig! 💪', emoji: '💪', bg: 0x263238, dauer: 3000 },
-          { text: '🐦 Drin sitzt ein kleiner Vogel!\nEr hatte Hunger! 🥺', emoji: '🐦', bg: 0x37474F, dauer: 3000 },
-          { text: '🦔 "Hier, nimm die Hälfte.\nAber die anderen gehören dem Eichhörnchen!"', emoji: '🦔', bg: 0x4CAF50, dauer: 3500 },
-          { text: '🐿️🐦 Alle teilen fair!\nDer Vogel hat jetzt Freunde! 💕', emoji: '💕', bg: 0x4CAF50, dauer: 3000 },
-          { text: '🦔 Blitz ist ein Held! 🎉⭐', emoji: '⭐', bg: 0x4CAF50, dauer: 3000 },
+          { dialog: 'HILFE! HILFE! Jemand hat meine Nüsse geklaut!', sprecher: '🐿️', figuren: ['🐿️'], landschaft: 'wald', dauer: 4000 },
+          { dialog: 'Keine Sorge! Ich helfe dir! Blitz ist da!', sprecher: '🦔', figuren: ['🦔', '🐿️'], landschaft: 'wald', dauer: 4000 },
+          { erzaehler: 'Blitz folgte den Spuren im Gras... sie führten zu einer dunklen Höhle!', figuren: ['🦔'], landschaft: 'wald', dauer: 5000 },
+          { dialog: 'Die Höhle ist ganz dunkel... aber ich bin mutig!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'hoehle', dauer: 4000 },
+          { erzaehler: 'In der Höhle saß ein kleiner Vogel. Er sah traurig aus...', figuren: ['🦔', '🐦'], landschaft: 'hoehle', dauer: 4000 },
+          { dialog: 'Es tut mir leid! Ich hatte so großen Hunger...', sprecher: '🐦', figuren: ['🦔', '🐦'], landschaft: 'hoehle', dauer: 4000 },
+          { dialog: 'Hier, nimm die Hälfte! Aber die anderen gehören dem Eichhörnchen!', sprecher: '🦔', figuren: ['🦔', '🐦'], landschaft: 'hoehle', dauer: 5000 },
+          { erzaehler: 'Alle teilten fair! Und der kleine Vogel hatte jetzt zwei neue Freunde! 💕', figuren: ['🦔', '🐿️', '🐦'], landschaft: 'wiese', dauer: 5000 },
         ]
       },
       {
         titel: 'Folge 7: Blitz im Schnee',
         szenen: [
-          { text: '❄️ Es schneit! Alles ist weiß!', emoji: '❄️', bg: 0x90CAF9, dauer: 2500 },
-          { text: '🦔 "SCHNEE! Wie cool!" ruft Blitz!', emoji: '🦔', bg: 0x90CAF9, dauer: 2500 },
-          { text: '⛄ Er baut einen Schneemann!\nMit Karotten-Nase! 🥕', emoji: '⛄', bg: 0xBBDEFB, dauer: 3000 },
-          { text: '🐰 Der Hase will auch mitmachen!\n"Ich mach die Arme!"', emoji: '🐰', bg: 0xBBDEFB, dauer: 2500 },
-          { text: '❄️ SCHNEEBALLSCHLACHT! 🎯', emoji: '🎯', bg: 0x90CAF9, dauer: 2500 },
-          { text: '🦔 PLATSCH! 😂 Blitz wird getroffen!', emoji: '💥', bg: 0x90CAF9, dauer: 2500 },
-          { text: '🦔🐰🐿️ Alle lachen und spielen im Schnee!', emoji: '😂', bg: 0xBBDEFB, dauer: 2500 },
-          { text: '☕ Danach gibt es heißen Kakao!\nMit Marshmallows! 🍫', emoji: '☕', bg: 0x5D4037, dauer: 3000 },
-          { text: '🦔 "Das war der beste Schneetag ever!" ❄️⭐', emoji: '⭐', bg: 0x90CAF9, dauer: 3000 },
+          { erzaehler: 'Eines Morgens wachte Blitz auf... und alles war weiß!', figuren: ['🦔'], landschaft: 'schnee', dauer: 4000 },
+          { dialog: 'SCHNEE! Es hat geschneit! Wie COOL!', sprecher: '🦔', figuren: ['🦔'], landschaft: 'schnee', dauer: 4000 },
+          { dialog: 'Lass uns einen Schneemann bauen! Ich mach die Nase!', sprecher: '🐰', figuren: ['🦔', '🐰', '⛄'], landschaft: 'schnee', dauer: 5000 },
+          { erzaehler: 'Sie bauten den größten Schneemann der Welt! Mit Karottennase und Schal!', figuren: ['🦔', '🐰', '⛄'], landschaft: 'schnee', dauer: 5000 },
+          { dialog: 'SCHNEEBALLSCHLACHT! Fang den!', sprecher: '🐿️', figuren: ['🦔', '🐰', '🐿️'], landschaft: 'schnee', dauer: 4000 },
+          { dialog: 'Hey! PLATSCH! Haha, das war ein guter Treffer!', sprecher: '🦔', figuren: ['🦔', '🐰', '🐿️'], landschaft: 'schnee', dauer: 4000 },
+          { erzaehler: 'Alle spielten den ganzen Tag im Schnee und hatten riesigen Spaß!', figuren: ['🦔', '🐰', '🐿️'], landschaft: 'schnee', dauer: 4000 },
+          { dialog: 'Und jetzt einen heißen Kakao mit Marshmallows! Das war der beste Schneetag!', sprecher: '🦔', figuren: ['🦔', '🐰', '🐿️'], landschaft: 'schnee', dauer: 5000 },
         ]
       },
       {
         titel: 'Folge 8: Das Geburtstags-Fest',
         szenen: [
-          { text: '🎂 Heute hat Blitz Geburtstag!', emoji: '🎂', bg: 0xE91E63, dauer: 2500 },
-          { text: '🦔 Aber... wo sind alle seine Freunde?\nEs ist so still! 🥺', emoji: '🦔', bg: 0x795548, dauer: 3000 },
-          { text: '🦔 Blitz geht traurig spazieren...\n"Hat mich jeder vergessen?"', emoji: '😢', bg: 0x795548, dauer: 3000 },
-          { text: '🦔 Er geht nach Hause zurück...', emoji: '🦔', bg: 0x795548, dauer: 2500 },
-          { text: '🎉 ÜBERRASCHUNG!!!\n🐰🐿️🐦🐌 Alle sind da! 🎊', emoji: '🎉', bg: 0xE91E63, dauer: 3000 },
-          { text: '🎂 Eine riesige Torte mit Kerzen!\n🕯️🕯️🕯️🕯️🕯️', emoji: '🎂', bg: 0xE91E63, dauer: 3000 },
-          { text: '🦔 *pust!* Blitz bläst die Kerzen aus!\n"DANKE ihr seid die BESTEN!" 😭💕', emoji: '💕', bg: 0xE91E63, dauer: 3500 },
-          { text: '🎁 So viele Geschenke!\n🐰 gibt ihm eine Mütze! 🧢', emoji: '🎁', bg: 0xE91E63, dauer: 2500 },
-          { text: '🦔 Beste. Party. EVER! 🎉⭐💕', emoji: '⭐', bg: 0xE91E63, dauer: 3000 },
+          { erzaehler: 'Heute war ein besonderer Tag... Blitz hatte Geburtstag!', figuren: ['🦔'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Hmmm... wo sind denn alle? Es ist so still heute...', sprecher: '🦔', figuren: ['🦔'], landschaft: 'wiese', dauer: 4000 },
+          { dialog: 'Hat mich jeder vergessen? Ich bin ganz alleine...', sprecher: '🦔', figuren: ['🦔'], landschaft: 'wald', dauer: 4000 },
+          { erzaehler: 'Traurig ging Blitz nach Hause zurück...', figuren: ['🦔'], landschaft: 'wald', dauer: 4000 },
+          { erzaehler: 'Er öffnete die Tür und dann...', figuren: ['🦔'], landschaft: 'wiese', dauer: 3000 },
+          { dialog: 'ÜBERRASCHUNG!!! ALLES GUTE ZUM GEBURTSTAG!', sprecher: '🐰', figuren: ['🦔', '🐰', '🐿️', '🐦', '🐌'], landschaft: 'party', dauer: 5000 },
+          { dialog: 'Ihr habt mich nicht vergessen! Ihr seid die BESTEN Freunde der Welt!', sprecher: '🦔', figuren: ['🦔', '🐰', '🐿️', '🐦', '🐌'], landschaft: 'party', dauer: 5000 },
+          { erzaehler: 'Sie feierten die ganze Nacht! Es war die beste Geburtstagsparty ever! 🎉🎂', figuren: ['🦔', '🐰', '🐿️', '🐦', '🐌'], landschaft: 'party', dauer: 5000 },
         ]
       }
     ]
@@ -1082,16 +1074,306 @@ class HausSzene extends Phaser.Scene {
     elemente.push(zurueck)
   }
 
-  // === 📺 BLITZ-FOLGE ABSPIELEN! ===
+  // === 🎨 LANDSCHAFT MALEN – Zeichnet hübsche Hintergründe! ===
+  maleLandschaft(grafik, typ, bx, by, bw, bh) {
+    // bx, by = oben links vom Bildschirm-Bereich
+    // bw, bh = Breite und Höhe vom Bildschirm-Bereich
+
+    if (typ === 'wiese') {
+      // ☀️ Blauer Himmel
+      grafik.fillStyle(0x87CEEB, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.6)
+      // 🌿 Grünes Gras
+      grafik.fillStyle(0x4CAF50, 1)
+      grafik.fillRect(bx, by + bh * 0.6, bw, bh * 0.4)
+      // ☀️ Sonne
+      grafik.fillStyle(0xFFEB3B, 1)
+      grafik.fillCircle(bx + bw * 0.85, by + bh * 0.15, 25)
+      // 🌸 Blumen
+      const blumenFarben = [0xFF4081, 0xFFEB3B, 0xE040FB, 0xFF6D00]
+      for (let i = 0; i < 8; i++) {
+        const fx = bx + bw * 0.1 + (i / 8) * bw * 0.8
+        const fy = by + bh * 0.7 + Math.sin(i * 2) * 15
+        grafik.fillStyle(blumenFarben[i % blumenFarben.length], 1)
+        grafik.fillCircle(fx, fy, 5)
+        grafik.fillStyle(0x388E3C, 1)
+        grafik.fillRect(fx - 1, fy, 2, 12)
+      }
+      // ⛰️ Sanfte Hügel
+      grafik.fillStyle(0x66BB6A, 1)
+      grafik.fillEllipse(bx + bw * 0.25, by + bh * 0.62, bw * 0.4, bh * 0.12)
+      grafik.fillEllipse(bx + bw * 0.7, by + bh * 0.65, bw * 0.35, bh * 0.1)
+    }
+
+    else if (typ === 'wald') {
+      // 🌲 Dunkler Waldhimmel
+      grafik.fillStyle(0x2E7D32, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.55)
+      // 🟤 Waldboden
+      grafik.fillStyle(0x5D4037, 1)
+      grafik.fillRect(bx, by + bh * 0.55, bw, bh * 0.45)
+      // 🌲 Bäume im Hintergrund
+      for (let i = 0; i < 6; i++) {
+        const tx = bx + bw * 0.1 + (i / 6) * bw * 0.85
+        const th = bh * 0.3 + Math.sin(i) * bh * 0.08
+        // Stamm
+        grafik.fillStyle(0x795548, 1)
+        grafik.fillRect(tx - 4, by + bh * 0.55 - th * 0.3, 8, th * 0.3)
+        // Krone (Dreieck als Kreis-Annäherung)
+        grafik.fillStyle(0x1B5E20, 1)
+        grafik.fillCircle(tx, by + bh * 0.55 - th * 0.5, 18)
+        grafik.fillCircle(tx, by + bh * 0.55 - th * 0.7, 14)
+      }
+      // 🍄 Pilze am Boden
+      grafik.fillStyle(0xF44336, 1)
+      grafik.fillCircle(bx + bw * 0.2, by + bh * 0.72, 7)
+      grafik.fillStyle(0xFFFFFF, 1)
+      grafik.fillCircle(bx + bw * 0.2 - 2, by + bh * 0.71, 2)
+      grafik.fillCircle(bx + bw * 0.2 + 3, by + bh * 0.72, 1.5)
+    }
+
+    else if (typ === 'regen') {
+      // 🌧️ Grauer Himmel
+      grafik.fillStyle(0x546E7A, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.6)
+      // 🌿 Nasses Gras
+      grafik.fillStyle(0x2E7D32, 1)
+      grafik.fillRect(bx, by + bh * 0.6, bw, bh * 0.4)
+      // ☁️ Wolken
+      grafik.fillStyle(0x78909C, 1)
+      grafik.fillCircle(bx + bw * 0.3, by + bh * 0.15, 30)
+      grafik.fillCircle(bx + bw * 0.4, by + bh * 0.12, 25)
+      grafik.fillCircle(bx + bw * 0.7, by + bh * 0.18, 28)
+      grafik.fillCircle(bx + bw * 0.6, by + bh * 0.14, 22)
+      // 🌧️ Regentropfen
+      grafik.fillStyle(0x90CAF9, 0.7)
+      for (let i = 0; i < 20; i++) {
+        const rx = bx + Math.random() * bw
+        const ry = by + bh * 0.2 + Math.random() * bh * 0.4
+        grafik.fillRect(rx, ry, 2, 8)
+      }
+      // 🌧️ Pfützen
+      grafik.fillStyle(0x64B5F6, 0.5)
+      grafik.fillEllipse(bx + bw * 0.3, by + bh * 0.75, 40, 8)
+      grafik.fillEllipse(bx + bw * 0.7, by + bh * 0.8, 30, 6)
+    }
+
+    else if (typ === 'nacht') {
+      // 🌙 Dunkler Nachthimmel
+      grafik.fillStyle(0x0D1B2A, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.65)
+      // 🌿 Dunkles Gras
+      grafik.fillStyle(0x1B5E20, 1)
+      grafik.fillRect(bx, by + bh * 0.65, bw, bh * 0.35)
+      // 🌙 Mond
+      grafik.fillStyle(0xFFF9C4, 1)
+      grafik.fillCircle(bx + bw * 0.8, by + bh * 0.15, 20)
+      grafik.fillStyle(0x0D1B2A, 1)
+      grafik.fillCircle(bx + bw * 0.8 + 7, by + bh * 0.15 - 5, 17)
+      // ⭐ Sterne
+      grafik.fillStyle(0xFFFFFF, 1)
+      for (let i = 0; i < 25; i++) {
+        const sx = bx + Math.random() * bw
+        const sy = by + Math.random() * bh * 0.5
+        const groesse = 1 + Math.random() * 2
+        grafik.fillCircle(sx, sy, groesse)
+      }
+    }
+
+    else if (typ === 'schnee') {
+      // ❄️ Hellblauer Himmel
+      grafik.fillStyle(0xBBDEFB, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.55)
+      // ⬜ Schnee-Boden
+      grafik.fillStyle(0xFFFFFF, 1)
+      grafik.fillRect(bx, by + bh * 0.55, bw, bh * 0.45)
+      // ❄️ Schneeflocken in der Luft
+      grafik.fillStyle(0xFFFFFF, 0.8)
+      for (let i = 0; i < 30; i++) {
+        const sx = bx + Math.random() * bw
+        const sy = by + Math.random() * bh * 0.6
+        grafik.fillCircle(sx, sy, 1.5 + Math.random() * 2)
+      }
+      // 🌲 Verschneite Bäume
+      for (let i = 0; i < 3; i++) {
+        const tx = bx + bw * (0.15 + i * 0.35)
+        grafik.fillStyle(0x795548, 1)
+        grafik.fillRect(tx - 3, by + bh * 0.45, 6, bh * 0.12)
+        grafik.fillStyle(0x2E7D32, 1)
+        grafik.fillCircle(tx, by + bh * 0.38, 16)
+        // Schnee auf Bäumen
+        grafik.fillStyle(0xFFFFFF, 0.9)
+        grafik.fillCircle(tx, by + bh * 0.33, 10)
+      }
+      // Schneehügel
+      grafik.fillStyle(0xE3F2FD, 1)
+      grafik.fillEllipse(bx + bw * 0.5, by + bh * 0.58, bw * 0.6, bh * 0.1)
+    }
+
+    else if (typ === 'berg') {
+      // 🏔️ Blauer Himmel
+      grafik.fillStyle(0x64B5F6, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.7)
+      // 🟤 Boden
+      grafik.fillStyle(0x8D6E63, 1)
+      grafik.fillRect(bx, by + bh * 0.7, bw, bh * 0.3)
+      // 🏔️ Berge
+      grafik.fillStyle(0x78909C, 1)
+      // Berg links
+      grafik.fillTriangle(
+        bx + bw * 0.0, by + bh * 0.7,
+        bx + bw * 0.25, by + bh * 0.2,
+        bx + bw * 0.5, by + bh * 0.7
+      )
+      // Berg rechts (größer)
+      grafik.fillStyle(0x607D8B, 1)
+      grafik.fillTriangle(
+        bx + bw * 0.3, by + bh * 0.7,
+        bx + bw * 0.65, by + bh * 0.1,
+        bx + bw * 1.0, by + bh * 0.7
+      )
+      // ❄️ Schneekappen
+      grafik.fillStyle(0xFFFFFF, 1)
+      grafik.fillTriangle(
+        bx + bw * 0.2, by + bh * 0.28,
+        bx + bw * 0.25, by + bh * 0.2,
+        bx + bw * 0.3, by + bh * 0.28
+      )
+      grafik.fillTriangle(
+        bx + bw * 0.58, by + bh * 0.2,
+        bx + bw * 0.65, by + bh * 0.1,
+        bx + bw * 0.72, by + bh * 0.2
+      )
+    }
+
+    else if (typ === 'hoehle') {
+      // 🕳️ Dunkle Höhle
+      grafik.fillStyle(0x263238, 1)
+      grafik.fillRect(bx, by, bw, bh)
+      // 🪨 Höhlenwände (heller)
+      grafik.fillStyle(0x37474F, 1)
+      // Decke
+      for (let i = 0; i < 8; i++) {
+        const cx = bx + (i / 8) * bw
+        const ch = bh * 0.05 + Math.sin(i * 1.5) * bh * 0.08
+        grafik.fillRect(cx, by, bw / 8 + 2, ch)
+      }
+      // Boden
+      grafik.fillStyle(0x455A64, 1)
+      grafik.fillRect(bx, by + bh * 0.78, bw, bh * 0.22)
+      // 🪨 Stalaktiten von der Decke
+      grafik.fillStyle(0x546E7A, 1)
+      for (let i = 0; i < 5; i++) {
+        const sx = bx + bw * 0.1 + (i / 5) * bw * 0.8
+        const sl = 10 + Math.sin(i * 3) * 8
+        grafik.fillTriangle(sx - 4, by, sx + 4, by, sx, by + sl)
+      }
+      // ✨ Leuchtende Kristalle
+      grafik.fillStyle(0x80DEEA, 0.7)
+      grafik.fillCircle(bx + bw * 0.2, by + bh * 0.3, 4)
+      grafik.fillCircle(bx + bw * 0.8, by + bh * 0.25, 3)
+      grafik.fillStyle(0xCE93D8, 0.7)
+      grafik.fillCircle(bx + bw * 0.6, by + bh * 0.15, 3)
+    }
+
+    else if (typ === 'party') {
+      // 🎉 Party-Hintergrund
+      grafik.fillStyle(0xE91E63, 1)
+      grafik.fillRect(bx, by, bw, bh * 0.6)
+      // 🟫 Party-Boden
+      grafik.fillStyle(0x8D6E63, 1)
+      grafik.fillRect(bx, by + bh * 0.6, bw, bh * 0.4)
+      // 🎈 Luftballons
+      const ballonFarben = [0xF44336, 0x2196F3, 0xFFEB3B, 0x4CAF50, 0xE040FB, 0xFF9800]
+      for (let i = 0; i < 6; i++) {
+        const bxp = bx + bw * 0.1 + (i / 6) * bw * 0.8
+        const byp = by + bh * 0.15 + Math.sin(i * 2) * bh * 0.08
+        // Schnur
+        grafik.lineStyle(1, 0xBDBDBD, 0.5)
+        grafik.lineBetween(bxp, byp + 12, bxp, by + bh * 0.5)
+        // Ballon
+        grafik.fillStyle(ballonFarben[i], 1)
+        grafik.fillCircle(bxp, byp, 12)
+        // Glanz
+        grafik.fillStyle(0xFFFFFF, 0.3)
+        grafik.fillCircle(bxp - 3, byp - 3, 4)
+      }
+      // 🎊 Konfetti
+      const konfettiFarben = [0xFFEB3B, 0xF44336, 0x2196F3, 0x4CAF50, 0xE040FB]
+      for (let i = 0; i < 15; i++) {
+        grafik.fillStyle(konfettiFarben[i % konfettiFarben.length], 0.8)
+        const kx = bx + Math.random() * bw
+        const ky = by + Math.random() * bh * 0.6
+        grafik.fillRect(kx, ky, 3 + Math.random() * 4, 2 + Math.random() * 3)
+      }
+      // 🎂 Girlande oben
+      grafik.lineStyle(3, 0xFFEB3B, 0.8)
+      for (let i = 0; i < 10; i++) {
+        const gx1 = bx + (i / 10) * bw
+        const gx2 = bx + ((i + 1) / 10) * bw
+        const gy = by + bh * 0.05 + 8
+        grafik.lineBetween(gx1, gy - 5, (gx1 + gx2) / 2, gy + 5)
+        grafik.lineBetween((gx1 + gx2) / 2, gy + 5, gx2, gy - 5)
+      }
+    }
+  }
+
+  // === 💬 SPRECHBLASE ZEICHNEN ===
+  zeichneSprechblase(grafik, x, y, breiteB, hoeheB, zeigerX) {
+    // 💬 Weißer Hintergrund
+    grafik.fillStyle(0xFFFFFF, 0.95)
+    grafik.fillRoundedRect(x, y, breiteB, hoeheB, 12)
+    // 🖊️ Schwarzer Rand
+    grafik.lineStyle(2, 0x000000, 1)
+    grafik.strokeRoundedRect(x, y, breiteB, hoeheB, 12)
+    // 🔻 Zeiger nach unten (zur Figur)
+    grafik.fillStyle(0xFFFFFF, 0.95)
+    grafik.fillTriangle(
+      zeigerX - 8, y + hoeheB,
+      zeigerX + 8, y + hoeheB,
+      zeigerX, y + hoeheB + 14
+    )
+    // Rand für Zeiger
+    grafik.lineStyle(2, 0x000000, 1)
+    grafik.lineBetween(zeigerX - 8, y + hoeheB, zeigerX, y + hoeheB + 14)
+    grafik.lineBetween(zeigerX + 8, y + hoeheB, zeigerX, y + hoeheB + 14)
+    // Kleines weißes Rechteck um den Übergang zu verstecken
+    grafik.fillStyle(0xFFFFFF, 0.95)
+    grafik.fillRect(zeigerX - 9, y + hoeheB - 2, 18, 4)
+  }
+
+  // === 🔊 TEXT VORLESEN – Benutzt die Sprach-Ausgabe vom Browser! ===
+  textVorlesen(text) {
+    // 🔇 Vorherige Sprache stoppen
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel()
+    }
+    // 🗣️ Neuen Text vorlesen!
+    if (window.speechSynthesis) {
+      const rede = new SpeechSynthesisUtterance(text)
+      rede.lang = 'de-DE'       // 🇩🇪 Deutsch!
+      rede.rate = 0.85           // 🐌 Etwas langsamer für Kinder
+      rede.pitch = 1.2           // 🎵 Etwas höher – klingt freundlicher!
+      window.speechSynthesis.speak(rede)
+    }
+  }
+
+  // === 📺 BLITZ-FOLGE ABSPIELEN – Mit Landschaft, Sprechblasen und Stimme! ===
   blitzFolgeAbspielen(folge) {
     soundKlick()
 
     const breite = this.scale.width
     const hoehe = this.scale.height
 
-    // 📺 Bildschirm
+    // 📺 Bildschirm (schwarzer Rahmen)
     const bildschirm = this.add.rectangle(breite / 2, hoehe / 2, breite * 0.85, hoehe * 0.75, 0x000000)
     bildschirm.setStrokeStyle(4, 0x66BB6A).setDepth(300)
+
+    // 🎬 Bildschirm-Bereich berechnen
+    const bx = breite * 0.075 + 2   // links
+    const by = hoehe * 0.125 + 2     // oben
+    const bw = breite * 0.85 - 4    // breite
+    const bh = hoehe * 0.75 - 4     // höhe
 
     // 🎬 Intro-Jingle!
     const jingle = [523, 659, 784, 1047, 784, 1047]
@@ -1114,100 +1396,184 @@ class HausSzene extends Phaser.Scene {
       duration: 800, ease: 'Back.easeOut'
     })
 
+    // 📺 Titel vorlesen!
+    this.textVorlesen(folge.titel)
+
     // 📺 Nach 3 Sekunden: Erste Szene starten!
     this.time.delayedCall(3000, () => {
       introText.destroy()
 
       let szeneIndex = 0
 
-      // 🎬 Hintergrund (mit sanftem Einblenden)
-      const hg = this.add.rectangle(breite / 2, hoehe / 2, breite * 0.83, hoehe * 0.73, folge.szenen[0].bg)
-      hg.setDepth(301).setAlpha(0)
-      this.tweens.add({ targets: hg, alpha: 1, duration: 600 })
-      elemente.push(hg)
+      // 🎨 Grafik-Objekt für die Landschaft!
+      const landschaftGrafik = this.add.graphics().setDepth(301)
+      elemente.push(landschaftGrafik)
 
-      // 🦔 Großes Emoji – bewegt sich auf und ab wie es atmet!
-      const grossesEmoji = this.add.text(breite / 2, hoehe * 0.38, folge.szenen[0].emoji, {
-        fontSize: '52px'
-      }).setOrigin(0.5).setDepth(303)
-      elemente.push(grossesEmoji)
+      // 🎨 Grafik-Objekt für Sprechblasen!
+      const blasenGrafik = this.add.graphics().setDepth(303)
+      elemente.push(blasenGrafik)
 
-      // 🫁 Atem-Animation – Emoji bewegt sich sanft hoch und runter!
-      const atemTween = this.tweens.add({
-        targets: grossesEmoji,
-        y: hoehe * 0.38 - 6,
-        duration: 1200,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      })
+      // 📺 Figuren-Texte (Emojis am Boden)
+      let figurenTexte = []
 
-      // ✨ Kleine Sterne/Funken die im Hintergrund schweben!
-      const funken = []
-      for (let i = 0; i < 5; i++) {
-        const funke = this.add.text(
-          Phaser.Math.Between(breite * 0.15, breite * 0.85),
-          Phaser.Math.Between(hoehe * 0.18, hoehe * 0.6),
-          Phaser.Math.RND.pick(['✨', '⭐', '💫', '·', '•']),
-          { fontSize: Phaser.Math.Between(6, 12) + 'px' }
-        ).setOrigin(0.5).setDepth(302).setAlpha(0.3)
-        // 🌟 Jeder Funke schwebt langsam hoch!
-        this.tweens.add({
-          targets: funke,
-          y: funke.y - Phaser.Math.Between(15, 40),
-          alpha: { from: 0.1, to: 0.6 },
-          duration: Phaser.Math.Between(2000, 4000),
-          yoyo: true, repeat: -1,
-          delay: Phaser.Math.Between(0, 2000)
-        })
-        funken.push(funke)
-        elemente.push(funke)
-      }
+      // 📺 Sprechblasen-Text
+      let blasenText = null
 
-      // 📺 Text unten – größer damit man besser lesen kann!
-      const szenenText = this.add.text(breite / 2, hoehe * 0.68, folge.szenen[0].text, {
-        fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
-        stroke: '#000000', strokeThickness: 3,
-        align: 'center', wordWrap: { width: breite * 0.7 },
-        lineSpacing: 6
-      }).setOrigin(0.5).setDepth(303)
-      elemente.push(szenenText)
-
-      // 📺 Fortschrittsbalken unten
-      const balkenHg = this.add.rectangle(breite / 2, hoehe * 0.87, breite * 0.6, 6, 0x333333)
-      balkenHg.setDepth(303)
+      // 📺 Fortschrittsbalken
+      const balkenHg = this.add.rectangle(breite / 2, by + bh - 8, bw * 0.8, 6, 0x333333, 0.5)
+      balkenHg.setDepth(305)
       elemente.push(balkenHg)
-      const balken = this.add.rectangle(breite / 2 - (breite * 0.3), hoehe * 0.87, 0, 6, 0x66BB6A)
-      balken.setOrigin(0, 0.5).setDepth(304)
+      const balken = this.add.rectangle(breite / 2 - (bw * 0.4), by + bh - 8, 0, 6, 0x66BB6A)
+      balken.setOrigin(0, 0.5).setDepth(306)
       elemente.push(balken)
 
-      // 🎵 Szenen-Sound
-      const spieleSzenenSound = () => {
-        const toene = [330 + szeneIndex * 30, 392 + szeneIndex * 20]
-        toene.forEach((note, i) => {
-          setTimeout(() => spieleTon(note, 0.08, 0.04, 'sine'), i * 100)
+      // 🎬 Szene anzeigen!
+      const zeigeSzene = (idx) => {
+        const szene = folge.szenen[idx]
+
+        // 🎨 Landschaft malen!
+        landschaftGrafik.clear()
+        this.maleLandschaft(landschaftGrafik, szene.landschaft, bx, by, bw, bh)
+
+        // 🗑️ Alte Figuren wegräumen
+        figurenTexte.forEach(f => f.destroy())
+        figurenTexte = []
+
+        // 🗑️ Alte Sprechblase wegräumen
+        blasenGrafik.clear()
+        if (blasenText) {
+          blasenText.destroy()
+          blasenText = null
+        }
+
+        // 🦔 Figuren am Boden platzieren!
+        const bodenY = by + bh * 0.68
+        const figurenAnzahl = szene.figuren.length
+        const figurenBreite = bw * 0.6
+        const figurenStart = bx + bw * 0.2
+
+        szene.figuren.forEach((figur, i) => {
+          const fx = figurenStart + (figurenAnzahl === 1 ? figurenBreite / 2 : (i / (figurenAnzahl - 1)) * figurenBreite)
+          const figurText = this.add.text(fx, bodenY, figur, {
+            fontSize: '42px'
+          }).setOrigin(0.5).setDepth(303)
+          // 🎬 Figur hüpft rein!
+          figurText.setScale(0)
+          this.tweens.add({
+            targets: figurText,
+            scale: 1,
+            duration: 400,
+            ease: 'Back.easeOut',
+            delay: i * 100
+          })
+          figurenTexte.push(figurText)
+          elemente.push(figurText)
+        })
+
+        // 💬 Text anzeigen – als Sprechblase oder Erzähler!
+        const textInhalt = szene.dialog || szene.erzaehler
+
+        if (szene.dialog && szene.sprecher) {
+          // 💬 SPRECHBLASE über dem Sprecher!
+          const sprecherIndex = szene.figuren.indexOf(szene.sprecher)
+          const sprecherX = figurenStart + (figurenAnzahl === 1 ? figurenBreite / 2 : (Math.max(0, sprecherIndex) / Math.max(1, figurenAnzahl - 1)) * figurenBreite)
+
+          // 📏 Sprechblase berechnen
+          const maxBlasenBreite = bw * 0.7
+          const blasenBreite = Math.min(maxBlasenBreite, Math.max(120, szene.dialog.length * 7))
+          const blasenHoehe = 50 + Math.floor(szene.dialog.length / 30) * 16
+          const blasenX = Math.max(bx + 10, Math.min(bx + bw - blasenBreite - 10, sprecherX - blasenBreite / 2))
+          const blasenY = bodenY - 70 - blasenHoehe
+
+          // 💬 Sprechblase zeichnen!
+          this.zeichneSprechblase(blasenGrafik, blasenX, blasenY, blasenBreite, blasenHoehe, sprecherX)
+
+          // 📝 Text in der Sprechblase!
+          blasenText = this.add.text(blasenX + blasenBreite / 2, blasenY + blasenHoehe / 2, szene.dialog, {
+            fontSize: '11px', fontFamily: 'Arial', color: '#000000',
+            align: 'center', wordWrap: { width: blasenBreite - 20 },
+            lineSpacing: 3
+          }).setOrigin(0.5).setDepth(304)
+          elemente.push(blasenText)
+
+          // 🎬 Text einblenden!
+          blasenText.setAlpha(0)
+          this.tweens.add({ targets: blasenText, alpha: 1, duration: 400, delay: 300 })
+
+          // 🔊 Vorlesen!
+          this.textVorlesen(szene.dialog)
+
+        } else if (szene.erzaehler) {
+          // 📖 ERZÄHLER-TEXT unten im Bild (kein Sprechblase)
+          blasenText = this.add.text(bx + bw / 2, by + bh * 0.88, szene.erzaehler, {
+            fontSize: '12px', fontFamily: 'Arial', color: '#ffffff',
+            stroke: '#000000', strokeThickness: 3,
+            align: 'center', wordWrap: { width: bw * 0.8 },
+            lineSpacing: 4
+          }).setOrigin(0.5).setDepth(304)
+          elemente.push(blasenText)
+
+          // 🎬 Text einblenden!
+          blasenText.setAlpha(0)
+          this.tweens.add({ targets: blasenText, alpha: 1, duration: 500, delay: 200 })
+
+          // 🔊 Vorlesen!
+          this.textVorlesen(szene.erzaehler)
+        }
+
+        // 📊 Fortschrittsbalken
+        const fortschritt = (idx / Math.max(1, folge.szenen.length - 1)) * bw * 0.8
+        this.tweens.add({ targets: balken, displayWidth: fortschritt, duration: 300 })
+
+        // 🎵 Szenen-Sound
+        const toene = [330 + idx * 30, 392 + idx * 20]
+        toene.forEach((note, j) => {
+          setTimeout(() => spieleTon(note, 0.08, 0.04, 'sine'), j * 100)
         })
       }
-      spieleSzenenSound()
+
+      // 🎬 Erste Szene zeigen!
+      zeigeSzene(0)
 
       // 📺 Nächste Szene Funktion
       const naechsteSzene = () => {
         szeneIndex++
         if (szeneIndex >= folge.szenen.length) {
           // 🎬 ENDE!
-          hg.setFillStyle(0x1a237e)
-          grossesEmoji.setText('⭐')
-          atemTween.stop()
-          // ⭐ Stern dreht sich am Ende!
+          landschaftGrafik.clear()
+          // Dunkler Hintergrund
+          landschaftGrafik.fillStyle(0x1a237e, 1)
+          landschaftGrafik.fillRect(bx, by, bw, bh)
+
+          // 🗑️ Figuren und Blasen weg
+          figurenTexte.forEach(f => f.destroy())
+          figurenTexte = []
+          blasenGrafik.clear()
+          if (blasenText) { blasenText.destroy(); blasenText = null }
+
+          // ⭐ Großer Stern!
+          const endeStern = this.add.text(breite / 2, hoehe * 0.4, '⭐', {
+            fontSize: '52px'
+          }).setOrigin(0.5).setDepth(303)
+          elemente.push(endeStern)
           this.tweens.add({
-            targets: grossesEmoji,
+            targets: endeStern,
             angle: 360, scale: 1.3,
             duration: 1500, ease: 'Sine.easeInOut'
           })
-          szenenText.setText('📺 Ende! 🦔⭐\n\nHat dir die Folge gefallen?')
-          balken.setDisplaySize(breite * 0.6, 6)
-          // ✨ Funken verschwinden lassen
-          funken.forEach(f => this.tweens.add({ targets: f, alpha: 0, duration: 500 }))
+
+          // 📝 Ende-Text
+          const endeText = this.add.text(breite / 2, hoehe * 0.6, '📺 Ende! 🦔⭐\n\nHat dir die Folge gefallen?', {
+            fontSize: '14px', fontFamily: 'Arial', color: '#ffffff',
+            stroke: '#000000', strokeThickness: 3, align: 'center'
+          }).setOrigin(0.5).setDepth(303)
+          elemente.push(endeText)
+
+          // Fortschritt voll
+          balken.setDisplaySize(bw * 0.8, 6)
+
+          // 🔊 Ende vorlesen
+          this.textVorlesen('Ende! Hat dir die Folge gefallen?')
 
           // 🎵 Ende-Jingle
           const endeJingle = [784, 659, 784, 1047]
@@ -1216,24 +1582,28 @@ class HausSzene extends Phaser.Scene {
           })
 
           // 📺 Buttons: Nochmal oder Zurück
-          const nochmal = this.add.text(breite * 0.35, hoehe * 0.84, '🔄 Nochmal!', {
+          const nochmal = this.add.text(breite * 0.35, hoehe * 0.78, '🔄 Nochmal!', {
             fontSize: '12px', fontFamily: 'Arial', color: '#4CAF50',
             backgroundColor: '#2E7D32', padding: { x: 8, y: 4 }
           }).setOrigin(0.5).setDepth(305)
           nochmal.setInteractive({ useHandCursor: true })
           nochmal.on('pointerdown', () => {
+            // 🔇 Stimme stoppen
+            if (window.speechSynthesis) window.speechSynthesis.cancel()
             elemente.forEach(el => el.destroy())
             nochmal.destroy()
             zurueck.destroy()
             this.blitzFolgeAbspielen(folge)
           })
 
-          const zurueck = this.add.text(breite * 0.65, hoehe * 0.84, '📺 Andere Folge', {
+          const zurueck = this.add.text(breite * 0.65, hoehe * 0.78, '📺 Andere Folge', {
             fontSize: '12px', fontFamily: 'Arial', color: '#FF5252',
             stroke: '#000000', strokeThickness: 2
           }).setOrigin(0.5).setDepth(305)
           zurueck.setInteractive({ useHandCursor: true })
           zurueck.on('pointerdown', () => {
+            // 🔇 Stimme stoppen
+            if (window.speechSynthesis) window.speechSynthesis.cancel()
             elemente.forEach(el => el.destroy())
             nochmal.destroy()
             zurueck.destroy()
@@ -1243,72 +1613,23 @@ class HausSzene extends Phaser.Scene {
           return
         }
 
-        // 🎬 Nächste Szene!
-        const szene = folge.szenen[szeneIndex]
+        // 🎬 Nächste Szene zeigen!
+        zeigeSzene(szeneIndex)
 
-        // 🎨 Hintergrund-Farbe sanft wechseln
-        this.tweens.addCounter({
-          from: 0, to: 1, duration: 600,
-          onUpdate: (tween) => {
-            hg.setFillStyle(szene.bg, 0.5 + tween.getValue() * 0.5)
-          },
-          onComplete: () => hg.setFillStyle(szene.bg)
-        })
-
-        // 🦔 Emoji wechseln – hüpft von der Seite rein!
-        const vonLinks = szeneIndex % 2 === 0
-        grossesEmoji.setText(szene.emoji)
-        grossesEmoji.setX(vonLinks ? breite * 0.05 : breite * 0.95)
-        grossesEmoji.setScale(0.5)
-        grossesEmoji.setAngle(vonLinks ? -20 : 20)
-        this.tweens.add({
-          targets: grossesEmoji,
-          x: breite / 2,
-          scale: 1,
-          angle: 0,
-          duration: 600,
-          ease: 'Back.easeOut'
-        })
-
-        // 📝 Text reinblenden mit leichtem Hochschieben
-        szenenText.setText(szene.text)
-        szenenText.setAlpha(0)
-        szenenText.setY(hoehe * 0.72)
-        this.tweens.add({
-          targets: szenenText,
-          alpha: 1,
-          y: hoehe * 0.68,
-          duration: 700,
-          ease: 'Power2'
-        })
-
-        // ✨ Funken neue Positionen
-        funken.forEach(f => {
-          f.setX(Phaser.Math.Between(breite * 0.15, breite * 0.85))
-          f.setText(Phaser.Math.RND.pick(['✨', '⭐', '💫', '·', '•']))
-        })
-
-        // 📊 Fortschrittsbalken updaten
-        const fortschritt = (szeneIndex / (folge.szenen.length - 1)) * breite * 0.6
-        this.tweens.add({ targets: balken, displayWidth: fortschritt, duration: 300 })
-
-        // 🎵 Sound
-        spieleSzenenSound()
-
-        // ⏰ Timer für nächste Szene (x2 damit man lesen kann!)
-        this.blitzTimer = this.time.delayedCall(szene.dauer * 2, naechsteSzene)
+        // ⏰ Timer für nächste Szene
+        this.blitzTimer = this.time.delayedCall(folge.szenen[szeneIndex].dauer, naechsteSzene)
       }
 
-      // ⏰ Timer für erste Szene starten! (x2 damit man lesen kann!)
-      this.blitzTimer = this.time.delayedCall(folge.szenen[0].dauer * 2, naechsteSzene)
+      // ⏰ Timer für erste Szene starten!
+      this.blitzTimer = this.time.delayedCall(folge.szenen[0].dauer, naechsteSzene)
 
       // ⏸️ Antippen = Pause/Weiter
       bildschirm.setInteractive()
       let pausiert = false
-      const pauseText = this.add.text(breite / 2, hoehe * 0.15, '', {
+      const pauseText = this.add.text(breite / 2, by + 15, '', {
         fontSize: '11px', fontFamily: 'Arial', color: '#FFD700',
         stroke: '#000000', strokeThickness: 2
-      }).setOrigin(0.5).setDepth(305)
+      }).setOrigin(0.5).setDepth(307)
       elemente.push(pauseText)
 
       bildschirm.on('pointerdown', () => {
@@ -1319,14 +1640,16 @@ class HausSzene extends Phaser.Scene {
           pauseText.setText('')
           naechsteSzene()
         } else {
-          // ⏸️ Pause!
+          // ⏸️ Pause! Stimme auch stoppen!
           pausiert = true
           pauseText.setText('⏸️ Pause – Tippe zum Weitergucken!')
+          if (window.speechSynthesis) window.speechSynthesis.cancel()
           if (this.blitzTimer) this.blitzTimer.remove()
         }
       })
     })
   }
+
 
   // === 💬 COMPUTER-CHAT MIT MILO ===
   computerChat() {
