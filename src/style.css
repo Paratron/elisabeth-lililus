@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800&display=swap');
+
+:root { font-family: 'Nunito', sans-serif; color: #293b38; background: #f8faf7; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+.schatz-truhe { position: absolute; left: 24px; top: 164px; z-index: 30; width: 64px; height: 64px; border: 2px solid #b38b27; border-radius: 8px; background: #fff7d6; font-size: 36px; }
+.schatz-truhe img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.schatz-unterwasser { left: 32%; top: auto; bottom: 14%; width: 80px; height: 80px; }
+.minimini-film-knopf { position: absolute; left: 24px; top: 164px; z-index: 30; max-width: calc(100% - 48px); white-space: normal; text-align: left; }
+.schatz-panel { z-index: 90; }
+.schatz-ton { margin-top: 16px; }
+.schatz-antworten { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.schatz-antworten[hidden] { display: none; }
+.schatz-frage, .schatz-meldung { overflow-wrap: anywhere; }
+.schatz-panel[hidden], .schatz-panel [hidden], .minimini-film-knopf[hidden], .schatz-truhe[hidden] { display: none !important; }
+.tauchwelt { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #268eac; }
+.tauch-bild { position: absolute; inset: 0; }
+.tauchwelt > h2 { position: absolute; left: 20px; top: 16px; color: white; pointer-events: none; font-size: 24px; }
+.tauch-raus { position: absolute; right: 16px; top: 16px; min-height: 48px; max-width: calc(100% - 32px); border: 0; border-radius: 8px; padding: 10px 18px; background: #fff; color: #245355; font-weight: 800; }
+.tauch-raus:disabled { background: #d6eef0; cursor: default; }
+.tauchstation-knopf { position: absolute; left: 24px; top: 104px; min-height: 48px; max-width: calc(100% - 48px); border: 0; border-radius: 8px; padding: 10px 18px; background: #fff; color: #245355; font-weight: 800; }
+.tauch-post { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; background: #fffdf4; border-radius: 8px; box-shadow: 0 8px 40px #174d5966; }
+.tauch-post button { min-height: 48px; padding: 10px 18px; border: 0; border-radius: 8px; background: #306853; color: white; }
+.online-post { position: absolute; inset: 5% max(16px, calc((100% - 640px) / 2)); z-index: 70; overflow: auto; padding: 24px; border-radius: 8px; background: #fff; box-shadow: 0 8px 40px #174d5966; }
+.online-post h2 { padding-right: 56px; }
+.besuche-panel { inset: 4% max(12px, calc((100% - 860px) / 2)); touch-action: pan-y; overflow-wrap: anywhere; }
+.besuche-panel article { padding: 12px 0; border-bottom: 1px solid #dde5df; }
+.besuche-panel article p { margin: 0 0 8px; }
+.besuche-panel article button { margin: 4px 8px 4px 0; max-width: 100%; white-space: normal; }
+.besuche-panel [hidden] { display: none; }
+.besuche-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.besuche-panel .besuche-erlaubnis { display: flex; align-items: center; gap: 8px; min-height: 48px; }
+.besuche-erlaubnis input { width: 48px; height: 48px; margin: 0; flex-shrink: 0; }
+.post-schliessen { position: absolute; top: 16px; right: 16px; }
+.post-liste { margin: 16px 0; max-height: 220px; overflow: auto; overflow-wrap: anywhere; }
+.post-liste article { padding: 12px 0; border-bottom: 1px solid #dde5df; }
+.post-liste p { margin: 6px 0; }
+.online-post label { display: block; margin: 12px 0; font-weight: 800; }
+.online-post select, .online-post textarea { display: block; width: 100%; min-height: 48px; padding: 10px; margin-top: 6px; font: inherit; border: 1px solid #cbd8d0; border-radius: 6px; }
+.post-senden, .post-verbinden { min-height: 48px; padding: 10px 16px; border: 0; border-radius: 6px; background: #306853; color: white; }
+.post-senden { display: inline-flex; align-items: center; gap: 8px; }
+.post-senden:disabled { background: #687970; cursor: default; }
+.post-verbinden { margin-top: 12px; }
+.stadt-sprechblase { position: absolute; z-index: 25; width: max-content; max-width: min(240px, calc(100% - 24px)); transform: translate(-50%, -100%); margin: 0; padding: 10px 14px; border-radius: 8px; background: white; border: 2px solid #7caa93; color: #293b38; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 3px 8px #304f4322; }
+.stadt-sprechblase::after { content: ''; position: absolute; left: calc(50% - 7px); bottom: -9px; width: 12px; height: 12px; background: white; border-right: 2px solid #7caa93; border-bottom: 2px solid #7caa93; transform: rotate(45deg); }
+@media (max-width: 480px) { .tauchwelt > h2 { top: 76px; font-size: 22px; } }
+button, input { font: inherit; }
+button { cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #216cba; outline-offset: 4px; }
+header { height: 86px; padding: 0 6%; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dde5df; background: #fff; }
+.marke { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 32px; color: #293b38; text-decoration: none; }
+.marke span { color: #de5c77; }
+.kapitel, .kleiner-titel { font-size: 12px; font-weight: 800; color: #58706a; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 1120px; margin: 0 auto; min-height: calc(100svh - 86px); }
+.vorschau { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 24px; background-color: #dff0e7; background-image: radial-gradient(#bfded0 1.5px, transparent 1.5px); background-size: 24px 24px; }
+.titel { text-align: center; }
+h1, h2 { font-family: 'Baloo 2', cursive; font-weight: 700; margin: 0; }
+h1 { font-size: 38px; line-height: 1.25; margin-top: 8px; }
+h2 { font-size: 27px; }
+#figur-bild { width: 100%; max-width: 420px; aspect-ratio: 420 / 440; position: relative; }
+canvas { display: block; }
+.namensschild { font-family: 'Baloo 2', cursive; font-size: 25px; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; text-align: center; padding: 4px 24px; border-bottom: 4px solid #eac653; }
+.bodenpunkte { display: flex; gap: 8px; margin-top: 24px; }
+.bodenpunkte span { width: 8px; height: 8px; border-radius: 50%; background: #7eafa0; }
+.bodenpunkte span:nth-child(2) { background: #e47a8e; }
+.bodenpunkte span:nth-child(3) { background: #d3ae35; }
+.werkstatt { padding: 32px 40px; background: #fff; }
+.werkstatt-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.symbol { width: 48px; height: 48px; border: 1px solid #d7e1db; background: #f4f8f5; border-radius: 8px; font-size: 32px; line-height: 1; color: #386856; }
+.name-label, legend { font-weight: 800; font-size: 14px; }
+.personalien { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; }
+input { width: 100%; height: 48px; margin: 7px 0 16px; padding: 10px 14px; border: 1px solid #cbd8d0; border-radius: 8px; background: #f8faf7; color: #293b38; }
+fieldset { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
+legend { padding: 0; margin-bottom: 8px; }
+.farben { display: flex; flex-wrap: wrap; gap: 9px; }
+.farbknopf { width: 48px; height: 48px; flex: 0 0 48px; border: 3px solid white; border-radius: 50%; background: var(--farbe); box-shadow: 0 0 0 1px #dce3de; display: grid; place-items: center; }
+.farbknopf span { visibility: hidden; font-weight: 800; font-size: 24px; color: white; text-shadow: 0 1px 3px #000, 0 0 3px #000; }
+.farbknopf[aria-pressed='true'] { box-shadow: 0 0 0 2px #293b38; }
+.farbknopf[aria-pressed='true'] span { visibility: visible; }
+.segmente { display: flex; gap: 6px; flex-wrap: wrap; }
+.segmente button { min-height: 48px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3de; background: #f7f9f6; color: #485b55; font-size: 14px; font-weight: 800; }
+.segmente button[aria-pressed='true'] { background: #dff0e7; border-color: #63927f; color: #244e3e; }
+footer { margin-top: 22px; }
+#speichern { width: 100%; min-height: 54px; border: 0; border-radius: 8px; background: #304f43; color: white; font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+#meldung { min-height: 40px; margin: 10px 0 0; font-size: 14px; color: #386856; }
+@media (min-width: 900px) and (orientation: landscape) {
+  header { height: 64px; }
+  main { grid-template-columns: minmax(0, 42fr) minmax(0, 58fr); min-height: calc(100svh - 64px); }
+  .vorschau { padding: 24px; }
+  .werkstatt { padding: 16px 24px; }
+  .werkstatt-kopf { margin-bottom: 8px; }
+  input { margin: 4px 0 8px; }
+  fieldset { margin-bottom: 8px; min-height: 48px; }
+  legend { float: left; width: 84px; margin: 0; padding-top: 14px; }
+  .farben, .segmente { margin-left: 84px; gap: 6px; }
+  footer { margin-top: 12px; }
+  #meldung { min-height: 22px; margin-top: 6px; }
+}
+@media (max-width: 760px) {
+  header { height: 68px; padding: 0 20px; }
+  .marke { font-size: 27px; }
+  main { grid-template-columns: 1fr; }
+  .vorschau { padding: 24px 20px; }
+  h1 { font-size: 30px; }
+  #figur-bild { max-width: 270px; }
+  .namensschild { font-size: 22px; }
+  .bodenpunkte { margin-top: 16px; }
+  .werkstatt { padding: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+
+.in-der-welt { overflow: hidden; }
+.landschaft { position: fixed; inset: 0; overflow: hidden; background: #b9e8f6; touch-action: none; }
+.landschaft > canvas { width: 100%; height: 100%; }
+#wiesen-bild { position: absolute; inset: 0; background: #a5d779; }
+.welt-leiste { position: absolute; top: 20px; left: 24px; right: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
+.welt-name { max-width: calc(100% - 80px); padding: 8px 16px; background: #fffffff0; border-radius: 8px; }
+.welt-name strong { display: block; font: 800 25px 'Baloo 2', cursive; }
+.welt-name span { display: block; font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.welt-knopf, .steuerkreuz button { display: grid; place-items: center; width: 64px; height: 64px; padding: 0; border-radius: 8px; border: 2px solid #fff; background: #fffffff0; color: #304f43; box-shadow: 0 3px 0 #304f4329; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.steuerkreuz { position: absolute; bottom: 24px; left: 24px; display: grid; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(2, 64px); gap: 6px; }
+.steuerkreuz button[data-richtung='oben'] { grid-column: 2; grid-row: 1; }
+.steuerkreuz button[data-richtung='links'] { grid-column: 1; grid-row: 2; }
+.steuerkreuz button[data-richtung='unten'] { grid-column: 2; grid-row: 2; }
+.steuerkreuz button[data-richtung='rechts'] { grid-column: 3; grid-row: 2; }
+.steuerkreuz button.gedrueckt, .welt-knopf:active { color: #fff; background: #304f43; }
+.steuerkreuz button:disabled, .sprechknopf:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
+.sprechknopf { position: absolute; right: 24px; bottom: 24px; }
+.mikrofonknopf { position: absolute; right: 100px; bottom: 24px; }
+.mikrofonknopf[aria-pressed='true'] { background: #d74d64; color: #fff; }
+.mikrofonknopf:disabled { opacity: 0.6; cursor: wait; }
+.editor-werkzeuge { display: flex; align-items: center; gap: 8px; }
+.editor-werkzeuge .mikrofonknopf { position: static; width: 48px; height: 48px; flex: 0 0 48px; }
+.editor-werkzeuge .symbol { display: grid; place-items: center; flex: 0 0 48px; }
+.sprachmeldung { position: absolute; right: 24px; bottom: 100px; max-width: 280px; padding: 10px; border-radius: 6px; background: #fffffff0; font-size: 14px; }
+.sprachmeldung:empty { display: none; }
+.sprechblase { position: absolute; left: 50%; top: 40%; width: max-content; max-width: 260px; margin: 0; padding: 12px 18px; border: 2px solid #557966; border-radius: 8px; background: #fff; color: #293b38; font-size: 17px; font-weight: 800; text-align: center; pointer-events: none; transform: translate(-50%, -100%); }
+.haus-versprechen { position: absolute; right: 24px; bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; max-width: calc(100% - 280px); padding: 14px 18px; border: 2px solid #fff; border-radius: 8px; background: #304f43; color: #fff; font-size: 17px; font-weight: 800; }
+.haus-versprechen[hidden] { display: none; }
+.haus-versprechen svg { flex: 0 0 24px; }
+.haus-versprechen:disabled { background: #e1f0df; color: #304f43; cursor: default; }
+.spieler-zusage { position: absolute; right: 24px; bottom: 24px; max-width: calc(100% - 280px); margin: 0; padding: 16px 20px; border: 2px solid #557966; border-radius: 8px; background: #fff; color: #304f43; font-size: 17px; font-weight: 800; }
+.haus-farben { position: absolute; right: 24px; bottom: 24px; width: 320px; max-width: calc(100% - 280px); padding: 16px; border: 1px solid #a3b9a8; border-radius: 8px; background: #fffffff5; }
+.haus-farben h2 { font-size: 23px; line-height: 1.3; margin-bottom: 12px; }
+.haus-farben fieldset { margin: 0 0 14px; min-height: 0; }
+.haus-farben legend { float: none; width: auto; padding: 0; margin-bottom: 8px; }
+.haus-farben .farben { margin: 0; gap: 8px; }
+.haus-fertig { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; border: 0; border-radius: 6px; background: #304f43; color: #fff; font-weight: 800; }
+.zimmer-gestaltung { top: 96px; bottom: 104px; width: 248px; overflow-y: auto; }
+.zimmer-gestaltung h2 { font-size: 20px; padding-right: 48px; min-height: 48px; }
+.zimmer-gestaltung fieldset { margin-bottom: 10px; }
+.zimmer-knopf { position: absolute; right: 104px; top: 24px; }
+.zimmer-knopf[hidden] { display: none; }
+.zimmer-schliessen { position: absolute; top: 12px; right: 12px; }
+.emoji-auswahl { display: flex; gap: 8px; }
+.emoji-auswahl button { width: 56px; height: 48px; padding: 0; border: 2px solid #b8c9be; border-radius: 6px; background: #fff; font-size: 28px; }
+.emoji-auswahl button[aria-pressed='true'] { border-color: #304f43; background: #e1f0df; }
+.handy-knopf { position: absolute; right: 184px; top: 24px; }
+.handy-knopf[hidden] { display: none; }
+.handy { position: fixed; inset: 0; z-index: 50; overflow-y: auto; padding: 56px 32px 84px; border: 14px solid #26332e; border-radius: 28px; background: linear-gradient(135deg, #d3f0e5 0%, #e7f5fb 55%, #f9e2ea 100%); touch-action: manipulation; box-shadow: inset 0 0 0 2px #ffffff90; }
+.handy::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 84px; height: 14px; border-radius: 8px; background: #26332e; }
+.handy h2 { font-size: 28px; text-align: center; padding: 0 64px; min-height: 48px; }
+.handy-start { max-width: 720px; margin: 0 auto; text-align: center; }
+.handy label { display: block; font-weight: 800; margin-bottom: 8px; }
+.handy input { width: 100%; max-width: 300px; min-height: 48px; font-size: 20px; text-transform: uppercase; }
+.handy-schliessen { position: absolute; right: 24px; top: 24px; }
+.online-status { min-height: 24px; margin: 12px 0; font-size: 15px; }
+.tablet-apps { display: grid; grid-template-columns: repeat(4, 96px); justify-content: center; gap: 32px; margin: 32px 0 40px; }
+.tablet-app { width: 96px; height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border: 2px solid #ffffff; border-radius: 8px; background: #9ee0bb; color: #304f43; font-weight: 800; box-shadow: 0 4px 0 #26332e15; }
+.tablet-app:disabled { opacity: 0.5; cursor: wait; }
+.stadt-status { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 280px; margin: 0; padding: 10px 14px; background: #fff; border-radius: 8px; color: #304f43; font-size: 15px; font-weight: 800; text-align: center; }
+.laden-zurueck { bottom: 96px; }
+.handy-app-inhalt { max-width: 760px; margin: 24px auto; }
+.handy-home { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); }
+.sterne-spielfeld { position: relative; width: min(100%, 480px); height: 300px; margin: 24px auto; background: #ffffff80; border: 2px solid #ffffff; border-radius: 8px; }
+.stern-sammeln { position: absolute; left: 35%; top: 30%; width: 96px; height: 96px; padding: 0; border: 2px solid #e9be39; border-radius: 8px; background: #fff7d1; font-size: 56px; }
+.sterne-punkte { text-align: center; font-size: 24px; font-weight: 800; }
+.chat-verlauf { height: 280px; overflow-y: auto; background: #fff; padding: 16px; border-radius: 8px; margin: 16px 0; }
+.chat-form { display: flex; gap: 12px; }
+.handy .chat-form input { max-width: none; text-transform: none; flex: 1; min-width: 0; }
+.chat-form button, .chat-verbinden { min-height: 48px; padding: 12px 20px; border: 0; border-radius: 6px; background: #304f43; color: #fff; }
+.mal-werkzeuge { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.mal-bild { display: block; width: 100%; aspect-ratio: 5 / 2; border: 2px solid #a3b9a8; border-radius: 8px; background: #fff; touch-action: none; }
+.chat-nachricht { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid #dce5df; }
+.chat-nachricht p { margin: 0; overflow-wrap: anywhere; min-width: 0; }
+.chat-nachricht .symbol { flex: 0 0 48px; }
+.chat-form button { display: grid; place-items: center; }
+.chat-form button:disabled { opacity: 0.5; }
+.stadt-chat-knopf { position: absolute; right: 104px; top: 24px; }
+.stadt-chat-knopf[hidden] { display: none; }
