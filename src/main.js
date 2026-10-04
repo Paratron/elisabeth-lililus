@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { createIcons, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Check, Shuffle, UserRound, Shirt, Smile, MessageCircle, Volume2, VolumeX, X, Send, Coins, DoorOpen, Armchair, Backpack, NotebookPen, Monitor, Sofa, Paintbrush, RotateCw, Trash2, Plus } from 'lucide';
+import { createIcons, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Check, Shuffle, UserRound, Shirt, Smile, MessageCircle, Volume2, VolumeX, X, Send, Coins, DoorOpen, Armchair, Backpack, NotebookPen, Monitor, Sofa, Paintbrush, RotateCw, Trash2, Plus, Maximize, Minimize } from 'lucide';
 import './style.css';
 
 const standard = { frisur: 'Bob', haut: '#dca17c', haare: '#542e23', oberteil: 'Pullover', farbe: '#e65a81', hose: 'Lang', hosenfarbe: '#487d9a', schuhe: 'Sneaker', schuhfarbe: '#f5bd45', hut: 'Keiner', brille: 'Keine', geschlecht: 'Mädchen', stimme: 'Hell', name: '', geburtstag: '', alter: '' };
@@ -20,7 +20,7 @@ if (/^\d{4}-\d{2}-\d{2}$/.test(auswahl.geburtstag)) {
 }
 
 document.querySelector('#game').innerHTML = `
-  <header><a class="marke" href="/">Lililus<span>3D</span></a><span class="schritt">DEINE FIGUR · 01</span></header>
+  <header><div class="kopfmarke"><a class="marke" href="/">Lililus<span>3D</span></a><button id="vollbild" class="symbol" type="button" aria-label="Vollbild einschalten" aria-pressed="false" title="Vollbild einschalten" hidden><i data-lucide="maximize"></i></button></div><span class="schritt">DEINE FIGUR · 01</span></header>
   <main>
     <section class="buehne" aria-label="Dein 3D-Charakter">
       <div class="titel"><span class="augenbraue">GANZ DU. ODER GANZ ANDERS.</span><h1>Hallo, <span id="figurname">Lili!</span></h1></div>
@@ -47,7 +47,31 @@ document.querySelector('#game').innerHTML = `
   </main>
   `;
 
-const symbole = () => createIcons({ icons: { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Check, Shuffle, UserRound, Shirt, Smile, MessageCircle, Volume2, VolumeX, X, Send, Coins, DoorOpen, Armchair, Backpack, NotebookPen, Monitor, Sofa, Paintbrush, RotateCw, Trash2, Plus } });
+const symbole = () => createIcons({ icons: { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Check, Shuffle, UserRound, Shirt, Smile, MessageCircle, Volume2, VolumeX, X, Send, Coins, DoorOpen, Armchair, Backpack, NotebookPen, Monitor, Sofa, Paintbrush, RotateCw, Trash2, Plus, Maximize, Minimize } });
+
+// 📱 Der Browser macht das ganze Spiel groß, nicht nur die 3D-Leinwand.
+const vollbildknopf = document.querySelector('#vollbild');
+vollbildknopf.hidden = !document.fullscreenEnabled;
+vollbildknopf.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch {
+    document.querySelector('#meldung').textContent = 'Dein Browser konnte Vollbild nicht öffnen. Probier es noch einmal.';
+  }
+});
+
+// Auch wenn du Vollbild mit der Zurück-Taste verlässt, passt der Knopf wieder.
+document.addEventListener('fullscreenchange', () => {
+  const istVollbild = Boolean(document.fullscreenElement);
+  const beschriftung = istVollbild ? 'Vollbild beenden' : 'Vollbild einschalten';
+  vollbildknopf.setAttribute('aria-pressed', String(istVollbild));
+  vollbildknopf.setAttribute('aria-label', beschriftung);
+  vollbildknopf.title = beschriftung;
+  vollbildknopf.innerHTML = `<i data-lucide="${istVollbild ? 'minimize' : 'maximize'}"></i>`;
+  symbole();
+});
+
 let aktuellerTab = 'look';
 const frisuren = ['Kurz', 'Bob', 'Lang', 'Locken', 'Zöpfe'];
 const hautfarben = ['#f5d5b8', '#dca17c', '#bd805d', '#925c40', '#623c2d', '#3d2821'];
