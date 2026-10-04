@@ -1,0 +1,21 @@
+diff --git a/node_modules/@mintplex-labs/piper-tts-web/dist/piper-tts-web.js b/node_modules/@mintplex-labs/piper-tts-web/dist/piper-tts-web.js
+index 250fa01..74465cb 100644
+--- a/node_modules/@mintplex-labs/piper-tts-web/dist/piper-tts-web.js
++++ b/node_modules/@mintplex-labs/piper-tts-web/dist/piper-tts-web.js
+@@ -365,7 +365,15 @@ predictChunk_fn = async function(text) {
+   const phonemeIds = await new Promise(async (resolve) => {
+     const module = await __privateGet(this, _createPiperPhonemize).call(this, {
+       print: (data) => {
+-        resolve(JSON.parse(data).phoneme_ids);
++        const ergebnis = JSON.parse(data);
++        const lautkarte = __privateGet(this, _modelConfig).phoneme_id_map;
++        const laute = Array.from(ergebnis.phonemes.join("").normalize("NFC"));
++        const lautnummern = [...lautkarte["^"], ...lautkarte["_"]];
++        for (const laut of laute) {
++          if (lautkarte[laut]) lautnummern.push(...lautkarte[laut], ...lautkarte["_"]);
++        }
++        lautnummern.push(...lautkarte["$"]);
++        resolve(lautnummern);
+       },
+       printErr: (message) => {
+         throw new Error(message);

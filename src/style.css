@@ -1,190 +1,176 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap');
 
-:root { font-family: 'Nunito', sans-serif; color: #293b38; background: #f8faf7; font-synthesis: none; }
+:root { font-family: 'DM Sans', sans-serif; color: #283c3a; background: #fafaf7; font-synthesis: none; --tinte: #283c3a; --gruen: #16796d; --linie: #e1e7e2; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; }
-.schatz-truhe { position: absolute; left: 24px; top: 164px; z-index: 30; width: 64px; height: 64px; border: 2px solid #b38b27; border-radius: 8px; background: #fff7d6; font-size: 36px; }
-.schatz-truhe img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.schatz-unterwasser { left: 32%; top: auto; bottom: 14%; width: 80px; height: 80px; }
-.minimini-film-knopf { position: absolute; left: 24px; top: 164px; z-index: 30; max-width: calc(100% - 48px); white-space: normal; text-align: left; }
-.schatz-panel { z-index: 90; }
-.schatz-ton { margin-top: 16px; }
-.schatz-antworten { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
-.schatz-antworten[hidden] { display: none; }
-.schatz-frage, .schatz-meldung { overflow-wrap: anywhere; }
-.schatz-panel[hidden], .schatz-panel [hidden], .minimini-film-knopf[hidden], .schatz-truhe[hidden] { display: none !important; }
-.tauchwelt { position: fixed; inset: 0; z-index: 100; overflow: hidden; background: #268eac; }
-.tauch-bild { position: absolute; inset: 0; }
-.tauchwelt > h2 { position: absolute; left: 20px; top: 16px; color: white; pointer-events: none; font-size: 24px; }
-.tauch-raus { position: absolute; right: 16px; top: 16px; min-height: 48px; max-width: calc(100% - 32px); border: 0; border-radius: 8px; padding: 10px 18px; background: #fff; color: #245355; font-weight: 800; }
-.tauch-raus:disabled { background: #d6eef0; cursor: default; }
-.tauchstation-knopf { position: absolute; left: 24px; top: 104px; min-height: 48px; max-width: calc(100% - 48px); border: 0; border-radius: 8px; padding: 10px 18px; background: #fff; color: #245355; font-weight: 800; }
-.tauch-post { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 24px; background: #fffdf4; border-radius: 8px; box-shadow: 0 8px 40px #174d5966; }
-.tauch-post button { min-height: 48px; padding: 10px 18px; border: 0; border-radius: 8px; background: #306853; color: white; }
-.online-post { position: absolute; inset: 5% max(16px, calc((100% - 640px) / 2)); z-index: 70; overflow: auto; padding: 24px; border-radius: 8px; background: #fff; box-shadow: 0 8px 40px #174d5966; }
-.online-post h2 { padding-right: 56px; }
-.besuche-panel { inset: 4% max(12px, calc((100% - 860px) / 2)); touch-action: pan-y; overflow-wrap: anywhere; }
-.besuche-panel article { padding: 12px 0; border-bottom: 1px solid #dde5df; }
-.besuche-panel article p { margin: 0 0 8px; }
-.besuche-panel article button { margin: 4px 8px 4px 0; max-width: 100%; white-space: normal; }
-.besuche-panel [hidden] { display: none; }
-.besuche-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.besuche-panel .besuche-erlaubnis { display: flex; align-items: center; gap: 8px; min-height: 48px; }
-.besuche-erlaubnis input { width: 48px; height: 48px; margin: 0; flex-shrink: 0; }
-.post-schliessen { position: absolute; top: 16px; right: 16px; }
-.post-liste { margin: 16px 0; max-height: 220px; overflow: auto; overflow-wrap: anywhere; }
-.post-liste article { padding: 12px 0; border-bottom: 1px solid #dde5df; }
-.post-liste p { margin: 6px 0; }
-.online-post label { display: block; margin: 12px 0; font-weight: 800; }
-.online-post select, .online-post textarea { display: block; width: 100%; min-height: 48px; padding: 10px; margin-top: 6px; font: inherit; border: 1px solid #cbd8d0; border-radius: 6px; }
-.post-senden, .post-verbinden { min-height: 48px; padding: 10px 16px; border: 0; border-radius: 6px; background: #306853; color: white; }
-.post-senden { display: inline-flex; align-items: center; gap: 8px; }
-.post-senden:disabled { background: #687970; cursor: default; }
-.post-verbinden { margin-top: 12px; }
-.stadt-sprechblase { position: absolute; z-index: 25; width: max-content; max-width: min(240px, calc(100% - 24px)); transform: translate(-50%, -100%); margin: 0; padding: 10px 14px; border-radius: 8px; background: white; border: 2px solid #7caa93; color: #293b38; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 3px 8px #304f4322; }
-.stadt-sprechblase::after { content: ''; position: absolute; left: calc(50% - 7px); bottom: -9px; width: 12px; height: 12px; background: white; border-right: 2px solid #7caa93; border-bottom: 2px solid #7caa93; transform: rotate(45deg); }
-@media (max-width: 480px) { .tauchwelt > h2 { top: 76px; font-size: 22px; } }
-button, input { font: inherit; }
-button { cursor: pointer; touch-action: manipulation; }
-button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #216cba; outline-offset: 4px; }
-header { height: 86px; padding: 0 6%; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dde5df; background: #fff; }
-.marke { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 32px; color: #293b38; text-decoration: none; }
-.marke span { color: #de5c77; }
-.kapitel, .kleiner-titel { font-size: 12px; font-weight: 800; color: #58706a; }
-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 1120px; margin: 0 auto; min-height: calc(100svh - 86px); }
-.vorschau { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 24px; background-color: #dff0e7; background-image: radial-gradient(#bfded0 1.5px, transparent 1.5px); background-size: 24px 24px; }
-.titel { text-align: center; }
-h1, h2 { font-family: 'Baloo 2', cursive; font-weight: 700; margin: 0; }
-h1 { font-size: 38px; line-height: 1.25; margin-top: 8px; }
-h2 { font-size: 27px; }
-#figur-bild { width: 100%; max-width: 420px; aspect-ratio: 420 / 440; position: relative; }
-canvas { display: block; }
-.namensschild { font-family: 'Baloo 2', cursive; font-size: 25px; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; text-align: center; padding: 4px 24px; border-bottom: 4px solid #eac653; }
-.bodenpunkte { display: flex; gap: 8px; margin-top: 24px; }
-.bodenpunkte span { width: 8px; height: 8px; border-radius: 50%; background: #7eafa0; }
-.bodenpunkte span:nth-child(2) { background: #e47a8e; }
-.bodenpunkte span:nth-child(3) { background: #d3ae35; }
-.werkstatt { padding: 32px 40px; background: #fff; }
-.werkstatt-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.symbol { width: 48px; height: 48px; border: 1px solid #d7e1db; background: #f4f8f5; border-radius: 8px; font-size: 32px; line-height: 1; color: #386856; }
-.name-label, legend { font-weight: 800; font-size: 14px; }
-.personalien { display: grid; grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; }
-input { width: 100%; height: 48px; margin: 7px 0 16px; padding: 10px 14px; border: 1px solid #cbd8d0; border-radius: 8px; background: #f8faf7; color: #293b38; }
-fieldset { border: 0; padding: 0; margin: 0 0 16px; min-width: 0; }
-legend { padding: 0; margin-bottom: 8px; }
-.farben { display: flex; flex-wrap: wrap; gap: 9px; }
-.farbknopf { width: 48px; height: 48px; flex: 0 0 48px; border: 3px solid white; border-radius: 50%; background: var(--farbe); box-shadow: 0 0 0 1px #dce3de; display: grid; place-items: center; }
-.farbknopf span { visibility: hidden; font-weight: 800; font-size: 24px; color: white; text-shadow: 0 1px 3px #000, 0 0 3px #000; }
-.farbknopf[aria-pressed='true'] { box-shadow: 0 0 0 2px #293b38; }
-.farbknopf[aria-pressed='true'] span { visibility: visible; }
-.segmente { display: flex; gap: 6px; flex-wrap: wrap; }
-.segmente button { min-height: 48px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3de; background: #f7f9f6; color: #485b55; font-size: 14px; font-weight: 800; }
-.segmente button[aria-pressed='true'] { background: #dff0e7; border-color: #63927f; color: #244e3e; }
-footer { margin-top: 22px; }
-#speichern { width: 100%; min-height: 54px; border: 0; border-radius: 8px; background: #304f43; color: white; font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
-#meldung { min-height: 40px; margin: 10px 0 0; font-size: 14px; color: #386856; }
-@media (min-width: 900px) and (orientation: landscape) {
-  header { height: 64px; }
-  main { grid-template-columns: minmax(0, 42fr) minmax(0, 58fr); min-height: calc(100svh - 64px); }
-  .vorschau { padding: 24px; }
-  .werkstatt { padding: 16px 24px; }
-  .werkstatt-kopf { margin-bottom: 8px; }
-  input { margin: 4px 0 8px; }
-  fieldset { margin-bottom: 8px; min-height: 48px; }
-  legend { float: left; width: 84px; margin: 0; padding-top: 14px; }
-  .farben, .segmente { margin-left: 84px; gap: 6px; }
-  footer { margin-top: 12px; }
-  #meldung { min-height: 22px; margin-top: 6px; }
+body { margin: 0; }
+button, input, select { font: inherit; }
+button { cursor: pointer; touch-action: manipulation; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #e69731; outline-offset: 3px; }
+button { transition: background 150ms, border-color 150ms; }
+svg { width: 20px; height: 20px; flex-shrink: 0; }
+header { height: 76px; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--linie); }
+.marke { font-family: 'Fredoka', sans-serif; font-size: 28px; color: var(--tinte); text-decoration: none; display: flex; gap: 10px; align-items: center; }
+.marke span { font-family: 'DM Sans', sans-serif; font-size: 13px; background: #f6ca58; border-radius: 6px; padding: 5px 7px; font-weight: 700; }
+.schritt, .augenbraue, .etikett { font-size: 11px; font-weight: 700; letter-spacing: 0; }
+.schritt { color: #788782; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 420px; min-height: calc(100dvh - 76px); }
+.buehne { position: relative; min-height: 690px; overflow: hidden; background: radial-gradient(ellipse at 50% 52%, #eff8ef 0%, #dcefe8 65%, #cee6df 100%); }
+.titel { position: absolute; top: 34px; left: 38px; right: 26px; z-index: 1; pointer-events: none; }
+.augenbraue { color: #617973; }
+h1, h2 { font-family: 'Fredoka', sans-serif; font-weight: 500; letter-spacing: 0; }
+h1 { font-size: 42px; margin: 9px 0; overflow-wrap: anywhere; }
+h2 { font-size: 28px; margin: 8px 0 23px; }
+#leinwand { position: absolute; inset: 100px 0 106px; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+canvas.moebelziehbar { cursor: grab; }
+canvas.moebelschieben { cursor: grabbing; }
+.drehknopf { position: absolute; bottom: 104px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 22px; }
+.drehknopf span { font-size: 12px; color: #617973; }
+.symbol { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid #b6cec4; background: #ffffffa6; border-radius: 50%; }
+.symbol:hover { background: white; }
+.buehnenfuss { position: absolute; bottom: 26px; left: 38px; right: 38px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.etikett { color: #627f75; }
+.zufall { background: transparent; border: 1px solid #9fbbb0; min-height: 48px; padding: 10px 15px; border-radius: 6px; display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; }
+.zufall:hover { background: #ffffff70; }
+aside { padding: 34px 28px 24px; display: flex; flex-direction: column; background: #fafaf7; }
+nav { display: flex; border-bottom: 1px solid var(--linie); gap: 3px; margin-bottom: 24px; }
+nav button { flex: 1; background: none; border: 0; border-bottom: 3px solid transparent; min-height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; font-size: 12px; padding: 8px 2px 12px; }
+nav button.aktiv { color: var(--gruen); border-bottom-color: var(--gruen); font-weight: 700; }
+fieldset { border: 0; padding: 0; margin: 0 0 22px; min-width: 0; }
+legend { padding: 0; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.optionen { display: flex; flex-wrap: wrap; gap: 7px; }
+.wahl { border: 1px solid #d8e0da; border-radius: 6px; background: #fff; min-height: 48px; padding: 10px 13px; font-size: 13px; }
+.wahl.gewaehlt { background: #e5f1ec; border-color: var(--gruen); color: #106d61; font-weight: 700; }
+.farben { display: flex; gap: 7px; flex-wrap: wrap; }
+.farbknopf { width: 48px; height: 48px; border: 3px solid #fafaf7; border-radius: 50%; background: var(--farbe); outline: 1px solid #d8e0da; display: grid; place-items: center; color: #fff; }
+.farbknopf svg { filter: drop-shadow(0 1px 2px #000); }
+.farbknopf.gewaehlt { outline: 2px solid var(--gruen); }
+.profil { display: flex; flex-direction: column; gap: 10px; }
+.profil label { font-size: 13px; font-weight: 700; }
+input, select { width: 100%; min-width: 0; min-height: 48px; border: 1px solid #cddbd3; border-radius: 6px; padding: 12px; background: white; color: var(--tinte); margin-bottom: 12px; }
+.geburtstaggruppe { margin: 0 0 12px; }
+.geburtstagfelder { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; }
+.geburtstagfelder > div { display: flex; flex-direction: column; gap: 10px; }
+.geburtstagfelder select { margin-bottom: 0; }
+.datenschutz, .klein { font-size: 13px; line-height: 1.6; color: #687b72; }
+.abschluss { margin-top: auto; }
+#meldung { font-size: 13px; color: #936224; line-height: 1.5; }
+.primaer { border: 0; background: var(--gruen); color: white; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 15px 20px; min-height: 52px; border-radius: 6px; width: 100%; font-weight: 700; }
+.primaer:hover { background: #106456; }
+dialog { border: 1px solid var(--linie); border-radius: 8px; padding: 30px; width: min(400px, calc(100% - 32px)); text-align: center; color: var(--tinte); }
+dialog::backdrop { background: #233b3659; }
+dialog p { overflow-wrap: anywhere; }
+.feier { margin: 0 auto 16px; color: #b16b14; background: #fff0c1; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; }
+.feier svg { width: 30px; height: 30px; }
+@media (min-width: 1500px) { main { grid-template-columns: minmax(0, 1fr) 470px; } aside { padding-left: 40px; padding-right: 40px; } }
+@media (max-width: 800px) {
+  header { padding: 0 20px; height: 64px; }
+  main { grid-template-columns: minmax(0, 1fr) 350px; min-height: calc(100dvh - 64px); }
+  aside { padding: 26px 18px 20px; }
+  .titel { left: 22px; top: 26px; }
+  h1 { font-size: 32px; }
+  h2 { font-size: 25px; }
+  .buehnenfuss { left: 16px; right: 16px; }
+  .etikett { display: none; }
+  .zufall { margin: auto; }
 }
-@media (max-width: 760px) {
-  header { height: 68px; padding: 0 20px; }
-  .marke { font-size: 27px; }
-  main { grid-template-columns: 1fr; }
-  .vorschau { padding: 24px 20px; }
-  h1 { font-size: 30px; }
-  #figur-bild { max-width: 270px; }
-  .namensschild { font-size: 22px; }
-  .bodenpunkte { margin-top: 16px; }
-  .werkstatt { padding: 24px; }
+@media (max-width: 620px) {
+  main { display: block; }
+  header { height: 60px; }
+  .marke { font-size: 24px; }
+  .schritt { font-size: 10px; }
+  .buehne { min-height: 0; height: 480px; }
+  .titel { top: 19px; }
+  h1.langername { font-size: 22px; }
+  #leinwand { inset: 100px 0 74px; }
+  .drehknopf { bottom: 62px; gap: 72px; }
+  .symbol { width: 48px; height: 48px; }
+  .buehnenfuss { bottom: 10px; }
+  .zufall { min-height: 48px; }
+  aside { padding: 24px 22px; }
+  .panelkopf h2 { margin-bottom: 12px; }
+  nav { margin-bottom: 22px; }
+  .farben { gap: 10px; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { button { transition: none; } }
 
-.in-der-welt { overflow: hidden; }
-.landschaft { position: fixed; inset: 0; overflow: hidden; background: #b9e8f6; touch-action: none; }
-.landschaft > canvas { width: 100%; height: 100%; }
-#wiesen-bild { position: absolute; inset: 0; background: #a5d779; }
-.welt-leiste { position: absolute; top: 20px; left: 24px; right: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; pointer-events: none; }
-.welt-name { max-width: calc(100% - 80px); padding: 8px 16px; background: #fffffff0; border-radius: 8px; }
-.welt-name strong { display: block; font: 800 25px 'Baloo 2', cursive; }
-.welt-name span { display: block; font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
-.welt-knopf, .steuerkreuz button { display: grid; place-items: center; width: 64px; height: 64px; padding: 0; border-radius: 8px; border: 2px solid #fff; background: #fffffff0; color: #304f43; box-shadow: 0 3px 0 #304f4329; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
-.steuerkreuz { position: absolute; bottom: 24px; left: 24px; display: grid; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(2, 64px); gap: 6px; }
-.steuerkreuz button[data-richtung='oben'] { grid-column: 2; grid-row: 1; }
-.steuerkreuz button[data-richtung='links'] { grid-column: 1; grid-row: 2; }
-.steuerkreuz button[data-richtung='unten'] { grid-column: 2; grid-row: 2; }
-.steuerkreuz button[data-richtung='rechts'] { grid-column: 3; grid-row: 2; }
-.steuerkreuz button.gedrueckt, .welt-knopf:active { color: #fff; background: #304f43; }
-.steuerkreuz button:disabled, .sprechknopf:disabled { opacity: 0.45; cursor: default; box-shadow: none; }
-.sprechknopf { position: absolute; right: 24px; bottom: 24px; }
-.mikrofonknopf { position: absolute; right: 100px; bottom: 24px; }
-.mikrofonknopf[aria-pressed='true'] { background: #d74d64; color: #fff; }
-.mikrofonknopf:disabled { opacity: 0.6; cursor: wait; }
-.editor-werkzeuge { display: flex; align-items: center; gap: 8px; }
-.editor-werkzeuge .mikrofonknopf { position: static; width: 48px; height: 48px; flex: 0 0 48px; }
-.editor-werkzeuge .symbol { display: grid; place-items: center; flex: 0 0 48px; }
-.sprachmeldung { position: absolute; right: 24px; bottom: 100px; max-width: 280px; padding: 10px; border-radius: 6px; background: #fffffff0; font-size: 14px; }
-.sprachmeldung:empty { display: none; }
-.sprechblase { position: absolute; left: 50%; top: 40%; width: max-content; max-width: 260px; margin: 0; padding: 12px 18px; border: 2px solid #557966; border-radius: 8px; background: #fff; color: #293b38; font-size: 17px; font-weight: 800; text-align: center; pointer-events: none; transform: translate(-50%, -100%); }
-.haus-versprechen { position: absolute; right: 24px; bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; max-width: calc(100% - 280px); padding: 14px 18px; border: 2px solid #fff; border-radius: 8px; background: #304f43; color: #fff; font-size: 17px; font-weight: 800; }
-.haus-versprechen[hidden] { display: none; }
-.haus-versprechen svg { flex: 0 0 24px; }
-.haus-versprechen:disabled { background: #e1f0df; color: #304f43; cursor: default; }
-.spieler-zusage { position: absolute; right: 24px; bottom: 24px; max-width: calc(100% - 280px); margin: 0; padding: 16px 20px; border: 2px solid #557966; border-radius: 8px; background: #fff; color: #304f43; font-size: 17px; font-weight: 800; }
-.haus-farben { position: absolute; right: 24px; bottom: 24px; width: 320px; max-width: calc(100% - 280px); padding: 16px; border: 1px solid #a3b9a8; border-radius: 8px; background: #fffffff5; }
-.haus-farben h2 { font-size: 23px; line-height: 1.3; margin-bottom: 12px; }
-.haus-farben fieldset { margin: 0 0 14px; min-height: 0; }
-.haus-farben legend { float: none; width: auto; padding: 0; margin-bottom: 8px; }
-.haus-farben .farben { margin: 0; gap: 8px; }
-.haus-fertig { width: 100%; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px; border: 0; border-radius: 6px; background: #304f43; color: #fff; font-weight: 800; }
-.zimmer-gestaltung { top: 96px; bottom: 104px; width: 248px; overflow-y: auto; }
-.zimmer-gestaltung h2 { font-size: 20px; padding-right: 48px; min-height: 48px; }
-.zimmer-gestaltung fieldset { margin-bottom: 10px; }
-.zimmer-knopf { position: absolute; right: 104px; top: 24px; }
-.zimmer-knopf[hidden] { display: none; }
-.zimmer-schliessen { position: absolute; top: 12px; right: 12px; }
-.emoji-auswahl { display: flex; gap: 8px; }
-.emoji-auswahl button { width: 56px; height: 48px; padding: 0; border: 2px solid #b8c9be; border-radius: 6px; background: #fff; font-size: 28px; }
-.emoji-auswahl button[aria-pressed='true'] { border-color: #304f43; background: #e1f0df; }
-.handy-knopf { position: absolute; right: 184px; top: 24px; }
-.handy-knopf[hidden] { display: none; }
-.handy { position: fixed; inset: 0; z-index: 50; overflow-y: auto; padding: 56px 32px 84px; border: 14px solid #26332e; border-radius: 28px; background: linear-gradient(135deg, #d3f0e5 0%, #e7f5fb 55%, #f9e2ea 100%); touch-action: manipulation; box-shadow: inset 0 0 0 2px #ffffff90; }
-.handy::before { content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 84px; height: 14px; border-radius: 8px; background: #26332e; }
-.handy h2 { font-size: 28px; text-align: center; padding: 0 64px; min-height: 48px; }
-.handy-start { max-width: 720px; margin: 0 auto; text-align: center; }
-.handy label { display: block; font-weight: 800; margin-bottom: 8px; }
-.handy input { width: 100%; max-width: 300px; min-height: 48px; font-size: 20px; text-transform: uppercase; }
-.handy-schliessen { position: absolute; right: 24px; top: 24px; }
-.online-status { min-height: 24px; margin: 12px 0; font-size: 15px; }
-.tablet-apps { display: grid; grid-template-columns: repeat(4, 96px); justify-content: center; gap: 32px; margin: 32px 0 40px; }
-.tablet-app { width: 96px; height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border: 2px solid #ffffff; border-radius: 8px; background: #9ee0bb; color: #304f43; font-weight: 800; box-shadow: 0 4px 0 #26332e15; }
-.tablet-app:disabled { opacity: 0.5; cursor: wait; }
-.stadt-status { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 280px; margin: 0; padding: 10px 14px; background: #fff; border-radius: 8px; color: #304f43; font-size: 15px; font-weight: 800; text-align: center; }
-.laden-zurueck { bottom: 96px; }
-.handy-app-inhalt { max-width: 760px; margin: 24px auto; }
-.handy-home { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); }
-.sterne-spielfeld { position: relative; width: min(100%, 480px); height: 300px; margin: 24px auto; background: #ffffff80; border: 2px solid #ffffff; border-radius: 8px; }
-.stern-sammeln { position: absolute; left: 35%; top: 30%; width: 96px; height: 96px; padding: 0; border: 2px solid #e9be39; border-radius: 8px; background: #fff7d1; font-size: 56px; }
-.sterne-punkte { text-align: center; font-size: 24px; font-weight: 800; }
-.chat-verlauf { height: 280px; overflow-y: auto; background: #fff; padding: 16px; border-radius: 8px; margin: 16px 0; }
-.chat-form { display: flex; gap: 12px; }
-.handy .chat-form input { max-width: none; text-transform: none; flex: 1; min-width: 0; }
-.chat-form button, .chat-verbinden { min-height: 48px; padding: 12px 20px; border: 0; border-radius: 6px; background: #304f43; color: #fff; }
-.mal-werkzeuge { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-.mal-bild { display: block; width: 100%; aspect-ratio: 5 / 2; border: 2px solid #a3b9a8; border-radius: 8px; background: #fff; touch-action: none; }
-.chat-nachricht { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid #dce5df; }
-.chat-nachricht p { margin: 0; overflow-wrap: anywhere; min-width: 0; }
-.chat-nachricht .symbol { flex: 0 0 48px; }
-.chat-form button { display: grid; place-items: center; }
-.chat-form button:disabled { opacity: 0.5; }
-.stadt-chat-knopf { position: absolute; right: 104px; top: 24px; }
-.stadt-chat-knopf[hidden] { display: none; }
+[hidden] { display: none !important; }
+body.spielmodus { overflow: hidden; }
+body.spielmodus main { display: block; height: calc(100dvh - 76px); min-height: 0; }
+body.spielmodus .buehne { height: 100%; min-height: 0; background: #b9e3ee; }
+body.spielmodus #leinwand { inset: 0; }
+body.spielmodus .titel, body.spielmodus .drehknopf, body.spielmodus .buehnenfuss, body.spielmodus aside { display: none; }
+#welt-ui { position: absolute; inset: 0; pointer-events: none; }
+#welt-ui button, #welt-ui input { pointer-events: auto; }
+.welttop { display: flex; justify-content: space-between; align-items: flex-start; position: absolute; top: 24px; left: 30px; right: 30px; gap: 18px; }
+.welttop h1 { font-size: 34px; margin: 3px 0; }
+.geldstand { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; font-weight: 700; color: #654e16; }
+.geldstand svg { width: 22px; height: 22px; color: #a06c00; }
+#geldmeldung { position: absolute; top: 132px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); margin: 0; background: #fff3c6; color: #56461f; border-radius: 8px; padding: 12px 16px; font-weight: 700; }
+#betreten { background: #f5bd45; color: #473c20; }
+#schulwerkzeuge, #hauswerkzeuge { position: absolute; bottom: 210px; left: 30px; right: 30px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; pointer-events: auto; }
+#schulwerkzeuge .primaer, #hauswerkzeuge .primaer { width: auto; min-width: 0; background: #fff9ef; color: #354740; }
+#schulwerkzeuge .primaer:disabled, #hauswerkzeuge .primaer:disabled { opacity: 0.6; cursor: default; }
+#schulpanel { position: absolute; top: 132px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); max-height: calc(100% - 360px); overflow: auto; background: #fffffff7; border: 1px solid #d9e4db; border-radius: 8px; padding: 16px 18px; pointer-events: auto; box-shadow: 0 8px 22px #234b3520; }
+.schulkopf { display: flex; align-items: center; gap: 8px; }
+.schulkopf h2 { margin: 0; font-family: 'Fredoka', sans-serif; font-size: 22px; line-height: 1.2; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.schulkopf .symbol { flex-shrink: 0; border: 0; background: none; }
+.ranzenbild { display: flex; justify-content: center; margin: 12px 0; }
+.ranzenbild svg { width: 60px; height: 60px; }
+.ranzenpreis { font-weight: 700; text-align: center; }
+#schulpanel .farben { margin-bottom: 16px; }
+.moebelfelder { display: grid; gap: 10px; }
+.moebelfelder fieldset { margin: 4px 0; }
+.moebelneu { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; }
+.moebelfelder select { width: 100%; min-width: 0; min-height: 48px; }
+.moebelfelder input[type="range"] { width: 100%; min-width: 0; min-height: 48px; padding: 0; accent-color: #39a99c; }
+.moebelaktionen { display: flex; gap: 10px; }
+.antworten { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.antworten button { min-width: 0; min-height: 48px; overflow-wrap: anywhere; }
+.aufgabenfrage { font-weight: 700; font-size: 20px; line-height: 1.4; }
+.aufgabenfortschritt { font-size: 13px; color: #667668; }
+#schulrueckmeldung { min-height: 24px; font-size: 14px; line-height: 1.5; }
+.weltwerkzeuge { display: flex; gap: 10px; }
+.weltwerkzeuge .symbol { background: #fffffff0; }
+.weltunten { position: absolute; bottom: 26px; left: 30px; right: 30px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.steuerkreuz { display: grid; grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(2, 54px); gap: 6px; }
+.steuerkreuz button { width: 54px; height: 54px; background: #fffffff0; border-radius: 8px; touch-action: none; user-select: none; }
+.steuerkreuz button:first-child { grid-column: 2; }
+.steuerkreuz button:nth-child(2) { grid-column: 1; grid-row: 2; }
+.steuerkreuz button:nth-child(3) { grid-column: 2; grid-row: 2; }
+.steuerkreuz button:nth-child(4) { grid-column: 3; grid-row: 2; }
+.steuerkreuz button.gedrueckt { background: #f8d477; }
+.sprechaktionen { display: flex; flex-direction: column; gap: 8px; max-width: 260px; min-width: 0; }
+.sprechaktionen .primaer { width: auto; min-width: 170px; box-shadow: 0 4px 16px #254c3620; }
+#selberreden { background: #fff8e8; color: #5e674e; }
+#reden:disabled { background: #eff4ed; color: #748379; cursor: default; }
+#sprechblase, #eigener-satz { position: absolute; top: 132px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); background: #fffffff5; border: 1px solid #d9e4db; border-radius: 8px; padding: 16px 18px; pointer-events: auto; box-shadow: 0 8px 22px #234b3520; }
+.sprechkopf { display: flex; gap: 8px; align-items: center; }
+.sprechkopf strong { margin-right: auto; font-family: 'Fredoka', sans-serif; font-size: 23px; overflow-wrap: anywhere; min-width: 0; }
+.sprechkopf .symbol { background: none; border: 0; flex-shrink: 0; }
+#sprechtext { font-size: 17px; line-height: 1.5; margin: 8px 0; overflow-wrap: anywhere; }
+#tonmeldung { color: #916329; font-size: 12px; line-height: 1.5; margin: 0; }
+#eigener-satz label { display: block; font-weight: 700; margin: 8px 48px 20px 0; }
+#eigener-satz > div { display: flex; gap: 8px; }
+#eigener-satz input { margin: 0; }
+#eigener-satz .primaer { width: auto; flex-shrink: 0; }
+#satzschliessen { position: absolute; top: 8px; right: 10px; border: 0; background: none; }
+@media (max-width: 800px) { body.spielmodus main { height: calc(100dvh - 64px); } }
+@media (max-width: 620px) {
+  body.spielmodus main { height: calc(100dvh - 60px); }
+  .welttop { top: 16px; left: 18px; right: 18px; }
+  .welttop h1 { font-size: 28px; }
+  .welttop .augenbraue { font-size: 10px; }
+  .weltunten { bottom: 18px; left: 14px; right: 14px; gap: 12px; }
+  #schulwerkzeuge, #hauswerkzeuge { bottom: 210px; left: 14px; right: 14px; }
+  #schulwerkzeuge .primaer, #hauswerkzeuge .primaer { padding: 10px 12px; font-size: 13px; }
+  #schulpanel { top: 116px; padding: 12px 14px; max-height: calc(100% - 344px); }
+  .steuerkreuz { grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); }
+  .steuerkreuz button { width: 48px; height: 48px; }
+  .sprechaktionen { max-width: 170px; }
+  .sprechaktionen .primaer { min-width: 0; padding: 12px 8px; gap: 6px; font-size: 13px; }
+  .sprechaktionen .primaer span { min-width: 0; overflow-wrap: anywhere; }
+  #sprechblase, #eigener-satz, #geldmeldung { top: 116px; padding: 12px 14px; }
+  #sprechtext { font-size: 15px; }
+  #eigener-satz .primaer { padding: 12px; }
+}
